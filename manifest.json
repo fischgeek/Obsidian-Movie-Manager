@@ -1,0 +1,11 @@
+{
+  "id": "movie-manager",
+  "name": "Movie Manager",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Movie manager driven by TMDB (https://tmdb.org).",
+  "author": "fischgeek",
+  "authorUrl": "https://github.com/fischgeek",
+  "fundingUrl": "",
+  "isDesktopOnly": false
+}
