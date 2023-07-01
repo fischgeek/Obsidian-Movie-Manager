@@ -6,3 +6,19 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+.search-results-title-contaier {
+
+}
+.search-results-title {
+    margin-bottom: 10px;
+}
+.search-results-poster-container {
+    display: inline-block;
+    width: 50px;
+}
+.search-results-overview-container {
+    display: inline-block;
+    width: 90%;
+    padding-left: 20px;
+    vertical-align: top;
+}

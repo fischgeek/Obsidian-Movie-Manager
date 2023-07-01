@@ -1,5 +1,5 @@
-import { App, Editor, MarkdownView, SuggestModal, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import { SearchMovie } from 'search-movie'
+import { App, Editor, MarkdownView, SuggestModal, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+import { SearchMovie,GetMovieDetails } from 'search-movie'
 import { MovieManagerSettings,IBook,IMovieSearchResult } from 'interfaces'
 
 function truncate (s: string, max: number) {
@@ -42,9 +42,9 @@ export default class MovieManager extends Plugin {
 						new Notice('Missing API Key')
 					} else {
 						let movieSearchResults = await SearchMovie(result, this.settings.apikey)
-						new SearchResultModal(this.app, movieSearchResults).open()
+						new SearchResultModal(this.app, movieSearchResults, this.settings.apikey).open()
 					}
-				  }).open();
+				  }).open()
 			}
 		})
 
@@ -52,6 +52,7 @@ export default class MovieManager extends Plugin {
 			id: 'suggest-modal',
 			name: 'Suggest Modal',
 			callback: () => {
+				// this.app.vault.create("new file.md", "hello world")
 				new SampleModal(this.app).open()
 			}
 		})
@@ -176,36 +177,46 @@ export class SearchModal extends Modal {
 	  let { contentEl } = this;
 	  contentEl.empty();
 	}
-  }
+}
   
 export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
 	Movies: IMovieSearchResult[]
-	constructor(app: App, movies: IMovieSearchResult[]) {
-		function fn () {
-			console.log('fn')
-		}
+	ApiKey: string
+	constructor(app: App, movies: IMovieSearchResult[], apikey: string) {
 		super(app);
 		this.Movies = movies
-		this.onChooseSuggestion = fn;
+		this.ApiKey = apikey
+		// this.onChooseSuggestion = onChooseSuggestion
 	  }
 
 	getSuggestions(query: string): IMovieSearchResult[] {
 		return this.Movies.filter((movie) =>
-		  movie.title.toLowerCase().includes(query.toLowerCase())
-		);
-	  }
-	
-	  // Renders each suggestion item.
-	  renderSuggestion(movie: IMovieSearchResult, el: HTMLElement) {
-		el.createEl("div", { text: movie.title });
-		el.createEl("small", { text: truncate250(movie.overview) });
-	  }
-	
-	  // Perform action on the selected suggestion.
-	  onChooseSuggestion(movie: IMovieSearchResult, evt: MouseEvent | KeyboardEvent) {
-		new Notice(`Selected ${movie.title}`);
-	  }
+		movie.title.toLowerCase().includes(query.toLowerCase()));
 	}
+	
+	// Renders each suggestion item.
+	renderSuggestion(movie: IMovieSearchResult, el: HTMLElement) {
+		const container = el.createEl("div", { cls: "search-results-title-container" })
+		const left = el.createEl("div", { cls: "search-results-poster-container" })
+		const right = el.createEl("div", { cls: "search-results-overview-container" })
+		container.createEl("div", { text: movie.title, cls: "search-results-title" })
+		left.createEl("img", { attr:{"src": movie.posterUrl, "width":"50"}})
+		right.createEl("small", { text: truncate250(movie.overview) })
+	}
+	
+	// Perform action on the selected suggestion.
+	onChooseSuggestion(movie: IMovieSearchResult, evt: MouseEvent | KeyboardEvent) {
+		new Notice(`Selected ${movie.title}`);
+		console.log('selected movie id: ' + movie.id)
+		GetMovieDetails(movie.id, this.ApiKey)
+		// let tf = new TFile()
+		// tf.name = "new file"
+		// tf.extension = ".md"
+		// tf.path = "/"
+		// app.vault.create("new file.md", "hello world")
+		return "string"
+	}
+}
 
 class SampleSettingTab extends PluginSettingTab {
 	plugin: MovieManager;

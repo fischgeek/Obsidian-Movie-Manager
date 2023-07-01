@@ -12,4 +12,5 @@ export interface IMovieSearchResult {
 	id: number
 	title: string
 	overview: string
+	posterUrl: string
 }
