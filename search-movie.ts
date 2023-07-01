@@ -1,12 +1,13 @@
 import { request } from "obsidian"
-import { MovieSearchResult } from 'classes'
+import { IMovieSearchResult } from "interfaces"
 
 function createSearchResultsList (res: any) {
-	let resList = [] as MovieSearchResult[]
+	let resList = [] as IMovieSearchResult[]
 	res.results.forEach( (movieResult: any) => {
 		console.log('movie id: ' + movieResult.id)
-		let mr = new MovieSearchResult(movieResult.id, movieResult.title, movieResult.overview)
-		resList.push(mr)
+		// let mr = new MovieSearchResult(movieResult.id, movieResult.title, movieResult.overview)
+		let x : IMovieSearchResult = {id: movieResult.id, title: movieResult.title, overview: movieResult.overview }
+		resList.push(x)
 	})
 	return resList
 }

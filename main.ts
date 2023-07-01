@@ -1,10 +1,17 @@
 import { App, Editor, MarkdownView, SuggestModal, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { SearchMovie } from 'search-movie'
-import { MovieManagerSettings,IBook } from 'interfaces'
-import { MovieSearchResult } from 'classes';
+import { MovieManagerSettings,IBook,IMovieSearchResult } from 'interfaces'
+
+function truncate (s: string, max: number) {
+	return s.substring(0, max)
+}
+function truncate250 (s: string) {
+	return truncate(s, 250)
+}
 
 const DEFAULT_SETTINGS: MovieManagerSettings = {
-	apikey: ''
+	apikey: '',
+	maxResults: 5
 }
 
 export default class MovieManager extends Plugin {
@@ -30,9 +37,13 @@ export default class MovieManager extends Plugin {
 			name: 'Search for a movie',
 			callback: () => {
 				new SearchModal(this.app, async (result) => {
-					new Notice(`Hello, ${result}!`);
-					let movieSearchResults = await SearchMovie(result, this.settings.apikey)
-					new SearchResultModal(this.app, movieSearchResults).open()
+					console.log('apikey: ' + this.settings.apikey)
+					if (!this.settings.apikey) {
+						new Notice('Missing API Key')
+					} else {
+						let movieSearchResults = await SearchMovie(result, this.settings.apikey)
+						new SearchResultModal(this.app, movieSearchResults).open()
+					}
 				  }).open();
 			}
 		})
@@ -167,9 +178,9 @@ export class SearchModal extends Modal {
 	}
   }
   
-export class SearchResultModal extends SuggestModal<MovieSearchResult> {
-	Movies: MovieSearchResult[]
-	constructor(app: App, movies: MovieSearchResult[]) {
+export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
+	Movies: IMovieSearchResult[]
+	constructor(app: App, movies: IMovieSearchResult[]) {
 		function fn () {
 			console.log('fn')
 		}
@@ -178,20 +189,20 @@ export class SearchResultModal extends SuggestModal<MovieSearchResult> {
 		this.onChooseSuggestion = fn;
 	  }
 
-	getSuggestions(query: string): MovieSearchResult[] {
+	getSuggestions(query: string): IMovieSearchResult[] {
 		return this.Movies.filter((movie) =>
 		  movie.title.toLowerCase().includes(query.toLowerCase())
 		);
 	  }
 	
 	  // Renders each suggestion item.
-	  renderSuggestion(movie: MovieSearchResult, el: HTMLElement) {
+	  renderSuggestion(movie: IMovieSearchResult, el: HTMLElement) {
 		el.createEl("div", { text: movie.title });
-		el.createEl("small", { text: movie.truncatedOverview() });
+		el.createEl("small", { text: truncate250(movie.overview) });
 	  }
 	
 	  // Perform action on the selected suggestion.
-	  onChooseSuggestion(movie: MovieSearchResult, evt: MouseEvent | KeyboardEvent) {
+	  onChooseSuggestion(movie: IMovieSearchResult, evt: MouseEvent | KeyboardEvent) {
 		new Notice(`Selected ${movie.title}`);
 	  }
 	}
