@@ -1,6 +1,6 @@
-import { App, Editor, MarkdownView, SuggestModal, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+import { App, Editor, MarkdownView, SuggestModal, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian'
 import { SearchMovie,GetMovieDetails } from 'search-movie'
-import { MovieManagerSettings,IBook,IMovieSearchResult } from 'interfaces'
+import { MovieManagerSettings,IBook,IMovieSearchResult, IGenre } from 'interfaces'
 
 function truncate (s: string, max: number) {
 	return s.substring(0, max)
@@ -41,8 +41,8 @@ export default class MovieManager extends Plugin {
 					if (!this.settings.apikey) {
 						new Notice('Missing API Key')
 					} else {
-						let movieSearchResults = await SearchMovie(result, this.settings.apikey)
-						new SearchResultModal(this.app, movieSearchResults, this.settings.apikey).open()
+						let movieSearchResults = await SearchMovie(result, this.settings)
+						new SearchResultModal(this.app, movieSearchResults, this.settings).open()
 					}
 				  }).open()
 			}
@@ -178,14 +178,23 @@ export class SearchModal extends Modal {
 	  contentEl.empty();
 	}
 }
+
+function makeGenreTagString (genres: IGenre[]) {
+	let str = ""
+	genres.forEach((genre: IGenre) => {
+		let g = genre.name.replace(" ", "")
+		str += `#${g} `
+	})
+	return str
+}
   
 export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
 	Movies: IMovieSearchResult[]
-	ApiKey: string
-	constructor(app: App, movies: IMovieSearchResult[], apikey: string) {
+	settings: MovieManagerSettings
+	constructor(app: App, movies: IMovieSearchResult[], settings: MovieManagerSettings) {
 		super(app);
 		this.Movies = movies
-		this.ApiKey = apikey
+		this.settings = settings
 		// this.onChooseSuggestion = onChooseSuggestion
 	  }
 
@@ -205,16 +214,20 @@ export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
 	}
 	
 	// Perform action on the selected suggestion.
-	onChooseSuggestion(movie: IMovieSearchResult, evt: MouseEvent | KeyboardEvent) {
+	async onChooseSuggestion(movie: IMovieSearchResult, evt: MouseEvent | KeyboardEvent) {
 		new Notice(`Selected ${movie.title}`);
 		console.log('selected movie id: ' + movie.id)
-		GetMovieDetails(movie.id, this.ApiKey)
-		// let tf = new TFile()
-		// tf.name = "new file"
-		// tf.extension = ".md"
-		// tf.path = "/"
-		// app.vault.create("new file.md", "hello world")
+		let movieDetail = await GetMovieDetails(movie.id, this.settings)
+
 		
+
+		let content = `${makeGenreTagString(movieDetail.genres)}
+		![](${movieDetail.posterUrl})
+		${movieDetail.overview}`
+		let fileName = movieDetail.title + ".md"
+		// app.vault.adapter.exists(fileName)
+		app.vault.adapter.write(fileName, content)
+		// app.vault.create(fileName, movieDetail.overview)
 	}
 }
 

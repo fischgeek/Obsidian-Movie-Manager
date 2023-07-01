@@ -1,5 +1,5 @@
 import { request } from "obsidian"
-import { IMovieSearchResult } from "interfaces"
+import { IGenre, IMediaDetail, IMovieSearchResult, MovieManagerSettings } from "interfaces"
 
 const baseUrl = "https://api.themoviedb.org/3"
 
@@ -24,7 +24,26 @@ function createSearchResultsList (res: any) {
 	return resList
 }
 
-export async function SearchMovie (title: string, apikey: string) {
+function createMediaResultList (x: any) {
+	let genreList = [] as IGenre[]
+	x.genres.forEach( (genre: IGenre) =>
+		genreList.push({id: genre.id, name: genre.name})
+	)
+	let md : IMediaDetail = {
+		id: x.id,
+		backdropUrl: x.backdrop_url,
+		overview: x.overview,
+		posterUrl: getSizedImage("w200", x.poster_path),
+		releaseDate: x.release_date,
+		runtime: x.runtime,
+		tagline: x.tagline,
+		title: x.title,
+		genres: genreList
+	}
+	return md
+}
+
+export async function SearchMovie (title: string, settings: MovieManagerSettings) {
 	console.log('searching for ' + title)
 
 	let xurl = new URL(baseUrl + "/search/movie")
@@ -32,7 +51,7 @@ export async function SearchMovie (title: string, apikey: string) {
 	xurl.searchParams.append("language", "en-US")
 	xurl.searchParams.append("page", "1")
 	xurl.searchParams.append("include_adult", "false")
-	xurl.searchParams.append("api_key", apikey)
+	xurl.searchParams.append("api_key", settings.apikey)
 
 	console.log('url: ' + xurl)
 
@@ -50,13 +69,13 @@ export async function SearchMovie (title: string, apikey: string) {
 	return resxx
 }
 
-export async function GetMovieDetails (movieId: number, apikey: string) {
+export async function GetMovieDetails (movieId: number, settings: MovieManagerSettings) {
 	console.log('searching for movie by id ' + movieId)
 
 	let xurl = new URL(`${baseUrl}/movie/${movieId}`)
 	xurl.searchParams.append("append_to_response", "credits")
 	xurl.searchParams.append("language", "en-US")
-	xurl.searchParams.append("api_key", apikey)
+	xurl.searchParams.append("api_key", settings.apikey)
 
 	console.log('url: ' + xurl)
 
@@ -69,7 +88,7 @@ export async function GetMovieDetails (movieId: number, apikey: string) {
 
 	console.log(resj)
 
-	// let resxx = createSearchResultsList(resj)
+	let resxx = createMediaResultList(resj)
 
-	return ""
+	return resxx
 }
