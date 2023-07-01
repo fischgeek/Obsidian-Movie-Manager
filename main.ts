@@ -214,7 +214,7 @@ export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
 		// tf.extension = ".md"
 		// tf.path = "/"
 		// app.vault.create("new file.md", "hello world")
-		return
+		
 	}
 }
 
