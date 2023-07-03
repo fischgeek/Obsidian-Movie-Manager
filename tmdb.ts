@@ -55,7 +55,7 @@ function createMediaResultList (x: any) {
 
 export async function SearchMovie (title: string, settings: MovieManagerSettings) {
 	console.log('searching for ' + title)
-	debugger
+	// debugger
 	console.log('using api key: ' + settings.apikey)
 
 	let xurl = new URL(baseUrl + "/search/movie")

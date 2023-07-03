@@ -1,5 +1,6 @@
+import { appendFileSync } from "fs";
 import { IActor, IGenre, IMediaDetail, IMovieSearchResult, IProductionCompany, MovieManagerSettings } from "interfaces";
-import { Notice } from "obsidian";
+import { Notice, WorkspaceLeaf } from "obsidian";
 import { GetMovieDetails } from "tmdb";
 
 function truncate (s: string, max: number) {
@@ -8,42 +9,55 @@ function truncate (s: string, max: number) {
 export function truncate250 (s: string) {
 	return truncate(s, 250)
 }
-function makeGenreTagString (genres: IGenre[]) {
+function makeTagString (items: string[]) {
 	let str = ""
-	genres.forEach((genre: IGenre) => {
-		let g = genre.name.replace(" ", "")
+	items.forEach((item: string) => {
+		let g = item.replace(" ", "")
 		str += `#${g} `
 	})
 	return str
 }
+function makeGenreTagString (genres: IGenre[]) {
+	return makeTagString(genres.map(genre => {return genre.name}))
+}
+let xrn = (str:string) => { return `${str}\r\n` }
+let xrnrn = (str:string) => { return `${str}\r\n\r\n` }
+let rnx = (str:string) => { return `\r\n${str}` }
+let rnrnx = (str:string) => { return `\r\n\r\n${str}` }
 
-export async function WriteMediaToFile (movie: IMovieSearchResult, settings: MovieManagerSettings) {
+export async function WriteMediaToFile (movie: IMovieSearchResult, settings: MovieManagerSettings, formatList: string[]) {
   new Notice(`Selected ${movie.title}`);
   console.log('selected movie id: ' + movie.id)
   let movieDetail = await GetMovieDetails(movie.id, settings)
   let fileName = movieDetail.title + ".md"
   app.vault.adapter.write(fileName, "")
+	app.vault.adapter.append(fileName, xrn("---"))
   if (settings.useBanner) {
-    app.vault.adapter.append(fileName, "---\r\n")
-    app.vault.adapter.append(fileName, `banner:\t'${movieDetail.backdropUrl}'\r\n`)
-    app.vault.adapter.append(fileName, `meta:\t'data'\r\n`)
-    app.vault.adapter.append(fileName, "---\r\n\r\n")
-    app.vault.adapter.append(fileName, "# new line\r\n")
+    app.vault.adapter.append(fileName, xrn(`banner:\t'${movieDetail.backdropUrl}`))
   }
-  app.vault.adapter.append(fileName, makeGenreTagString(movieDetail.genres) + "\r\n\r\n")
-  app.vault.adapter.append(fileName, `![](${movieDetail.posterUrl})\r\n`)
-  app.vault.adapter.append(fileName, `${movieDetail.overview}\r\n`)
+	app.vault.adapter.append(fileName, xrnrn("---"))
+  app.vault.adapter.append(fileName, xrnrn(makeGenreTagString(movieDetail.genres)))
+  app.vault.adapter.append(fileName, xrn(`![](${movieDetail.posterUrl})`))
+  app.vault.adapter.append(fileName, xrn(`${movieDetail.overview}`))
   if (settings.showCast) {
-    app.vault.adapter.append(fileName, "\r\n## Cast\r\n")
+		app.vault.adapter.append(fileName, xrn("## Cast"))
     let sliced = movieDetail.cast.slice(0, 5)
     sliced.forEach( (actor: IActor) =>{
-      app.vault.adapter.append(fileName, `[[${actor.name}]] ${actor.character}\r\n`)
+			app.vault.adapter.append(fileName, xrn(`[[${actor.name}]] ${actor.character}`))
     })
   }
   if (settings.showProductionCompanies) {
-    app.vault.adapter.append(fileName, "\r\n## Production Companies\r\n")
-    movieDetail.productionCompanies.forEach( (pc: IProductionCompany) =>{
-      app.vault.adapter.append(fileName, `[[${pc.name}]] | `)
+		app.vault.adapter.append(fileName, xrn("## Production Companies"))
+    movieDetail.productionCompanies.forEach( (pc: IProductionCompany) => {
+			app.vault.adapter.append(fileName, `[[${pc.name}]] | `)
     })
   }
+	if (settings.showOwnedFormats) {
+		app.vault.adapter.append(fileName, rnx(xrn("## Formats")))
+		app.vault.adapter.append(fileName, xrn(makeTagString(formatList)))
+	}
+	// let lastOpen = app.workspace.getLastOpenFiles()
+	// lastOpen.forEach((f:string) => {
+	// 	console.log('file: ' + f)
+	// })
 }

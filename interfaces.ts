@@ -1,9 +1,11 @@
 export interface MovieManagerSettings {
-	apikey: string;
-	maxResults: number;
-	useBanner: boolean;
-	showCast: boolean;
-	showProductionCompanies: boolean;
+	apikey: string
+	maxResults: number
+	useBanner: boolean
+	showCast: boolean
+	showProductionCompanies: boolean
+	formats: string[]
+	showOwnedFormats: boolean
 }
 
 export interface IBook {
@@ -46,4 +48,8 @@ export interface IMediaDetail {
 	genres: IGenre[]
 	cast: IActor[]
 	productionCompanies: IProductionCompany[]
+}
+
+export interface ConfirmFormats {
+	selectedFormats: string[]
 }

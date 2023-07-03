@@ -1,7 +1,9 @@
-import { App, Editor, MarkdownView, SuggestModal, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian'
+import { App, Editor, MarkdownView, SuggestModal, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, parseFrontMatterAliases } from 'obsidian'
 import { SearchMovie,GetMovieDetails } from 'tmdb'
 import { MovieManagerSettings,IBook,IMovieSearchResult, IGenre } from 'interfaces'
 import { WriteMediaToFile, truncate250 } from 'fun'
+import { SettingsTab } from 'settings'
+import { ConfirmModal } from 'confirm'
 
 
 
@@ -10,7 +12,9 @@ const DEFAULT_SETTINGS: MovieManagerSettings = {
 	maxResults: 5,
 	useBanner: false,
 	showCast: true,
-	showProductionCompanies: true
+	showProductionCompanies: true,
+	formats: ["DVD", "Blu-ray", "Plex"],
+	showOwnedFormats: true
 }
 
 export default class MovieManager extends Plugin {
@@ -31,6 +35,8 @@ export default class MovieManager extends Plugin {
 		const statusBarItemEl = this.addStatusBarItem();
 		statusBarItemEl.setText('Status Bar Text');
 
+		// new ConfirmModal(this.app, this.settings).open()
+
 		this.addCommand({
 			id: 'search-movie',
 			name: 'Search for a movie',
@@ -43,7 +49,7 @@ export default class MovieManager extends Plugin {
 						let movieSearchResults = await SearchMovie(result, this.settings)
 						new SearchResultModal(this.app, movieSearchResults, this.settings).open()
 					}
-				  }).open()
+					}).open()
 			}
 		})
 
@@ -94,7 +100,7 @@ export default class MovieManager extends Plugin {
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new SettingsTab(this.app, this));
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
@@ -107,7 +113,7 @@ export default class MovieManager extends Plugin {
 
 		this.addRibbonIcon('dice', 'Hello World', () => {
 			new Notice('Hello, world!');
-		  });
+			});
 	}
 
 	onunload() {
@@ -142,83 +148,42 @@ class SampleModal extends Modal {
 export class SearchModal extends Modal {
 	result: string;
 	onSubmit: (result: string) => void;
-  
+	
 	constructor(app: App, onSubmit: (result: string) => void) {
-	  super(app);
-	  this.onSubmit = onSubmit;
+		super(app);
+		this.onSubmit = onSubmit;
 	}
-  
+	
 	onOpen() {
-	  const { contentEl } = this;
-  
-	  contentEl.createEl("h1", { text: "Movie title" });
-  
-	  new Setting(contentEl)
+		const { contentEl } = this;
+	
+		contentEl.createEl("h1", { text: "Movie title" });
+	
+		new Setting(contentEl)
 		.setName("Title")
 		.addText((text) =>
-		  text.onChange((value) => {
-		  	 this.result = value
-		  })
+			text.onChange((value) => {
+				 this.result = value
+			})
 		);
-  
-	  new Setting(contentEl)
+	
+		new Setting(contentEl)
 		.addButton((btn) =>
-		  btn
+			btn
 			.setButtonText("Search")
 			.setCta()
 			.onClick(() => {
-			  this.close();
-			  this.onSubmit(this.result);
+				this.close();
+				this.onSubmit(this.result);
 			}));
 	}
-  
+	
 	onClose() {
-	  let { contentEl } = this;
-	  contentEl.empty();
+		let { contentEl } = this;
+		contentEl.empty();
 	}
 }
-
-export class ConfirmModal extends Modal {
-	result: string;
-	onSubmit: (result: string) => void;
-  
-	constructor(app: App, onSubmit: (result: string) => void) {
-	  super(app);
-	  this.onSubmit = onSubmit;
-	}
-  
-	onOpen() {
-	  const { contentEl } = this;
-  
-	  contentEl.createEl("h1", { text: "Confirm" });
-		contentEl.createEl("checkbox", { text: "hello"})
-  
-	  new Setting(contentEl)
-		.setName("Title")
-		.addText((text) =>
-		  text.onChange((value) => {
-		  	 this.result = value
-		  })
-		);
-  
-	  new Setting(contentEl)
-		.addButton((btn) =>
-		  btn
-			.setButtonText("Confirm")
-			.setCta()
-			.onClick(() => {
-			  this.close();
-				console.log('confirm modal: ' + this.result)
-			  this.onSubmit(this.result);
-			}));
-	}
-  
-	onClose() {
-	  let { contentEl } = this;
-	  contentEl.empty();
-	}
-}
-  
+	
 export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
 	Movies: IMovieSearchResult[]
 	settings: MovieManagerSettings
@@ -226,7 +191,7 @@ export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
 		super(app);
 		this.Movies = movies
 		this.settings = settings
-	  }
+		}
 
 	getSuggestions(query: string): IMovieSearchResult[] {
 		return this.Movies.filter((movie) =>
@@ -245,36 +210,13 @@ export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
 	
 	// Perform action on the selected suggestion.
 	async onChooseSuggestion(movie: IMovieSearchResult, evt: MouseEvent | KeyboardEvent) {
-		let res = new ConfirmModal(this.app, () => "").open()
-		//WriteMediaToFile(movie, this.settings)
-	}
-}
-
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MovieManager;
-
-	constructor(app: App, plugin: MovieManager) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		const {containerEl} = this;
-
-		containerEl.empty();
-
-		containerEl.createEl('h2', {text: 'Settings for my awesome plugin.'});
-
-		new Setting(containerEl)
-			.setName('API Key')
-			.setDesc('Your api key.')
-			.addText(text => text
-				.setPlaceholder('api key')
-				.setValue(this.plugin.settings.apikey)
-				.onChange(async (value) => {
-					console.log('api key: ' + value);
-					this.plugin.settings.apikey = value;
-					await this.plugin.saveSettings();
-				}));
+		if (this.settings.showOwnedFormats) {
+			new ConfirmModal(this.app, this.settings, (fmtList) => {
+				let formatList = fmtList.split(",")
+				WriteMediaToFile(movie, this.settings, formatList)
+			}).open()
+		} else {
+			WriteMediaToFile(movie, this.settings, [""])
+		}
 	}
 }
