@@ -49,7 +49,8 @@ function createMediaResultList (x: any, settings: MovieManagerSettings) {
 		title: x.title,
 		genres: genreList,
 		cast: castList,
-		productionCompanies: prodList
+		productionCompanies: prodList,
+		collection: x.belongs_to_collection.name
 	}
 	return md
 }

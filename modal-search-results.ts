@@ -31,7 +31,6 @@ export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
 	async onChooseSuggestion(movie: IMovieSearchResult, evt: MouseEvent | KeyboardEvent) {
 		if (this.settings.showOwnedFormats) {
 			new ConfirmModal(this.app, this.settings, (fmtList) => {
-				debugger
 				let formatList = fmtList.split(",")
 				WriteMediaToFile(movie, this.settings, formatList)
 			}).open()

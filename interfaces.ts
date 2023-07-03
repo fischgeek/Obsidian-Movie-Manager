@@ -2,6 +2,10 @@ export interface MovieManagerSettings {
 	apikey: string
 	maxResults: number
 	useBanner: boolean
+	addMeta: boolean
+	addSortTitle: boolean
+	ignoreThe: boolean
+	showCollections: boolean
 	showCast: boolean
 	castCount: number
 	showProductionCompanies: boolean
@@ -10,9 +14,9 @@ export interface MovieManagerSettings {
 	defaultFormatsToTrue: boolean
 }
 
-export interface IBook {
-	title: string;
-	author: string;
+export interface IKeyValuePair {
+	key: string
+	value: string
 }
 
 export interface IMovieSearchResult {
@@ -43,13 +47,14 @@ export interface IMediaDetail {
 	backdropUrl: string
 	overview: string
 	posterUrl: string
-	releaseDate: Date
+	releaseDate: string
 	runtime: number
 	tagline: string
 	title: string
 	genres: IGenre[]
 	cast: IActor[]
 	productionCompanies: IProductionCompany[]
+	collection: string
 }
 
 export interface ConfirmFormats {

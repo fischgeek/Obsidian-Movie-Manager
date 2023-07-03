@@ -1,11 +1,15 @@
 import { MovieManagerSettings } from "interfaces";
 import MovieManager from "main";
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, sanitizeHTMLToDom, Setting } from "obsidian";
 
 export const DEFAULT_SETTINGS: MovieManagerSettings = {
 	apikey: '',
 	maxResults: 5,
 	useBanner: false,
+	addMeta: true,
+	addSortTitle: true,
+	ignoreThe: true,
+	showCollections: true,
 	showCast: true,
 	castCount: 5,
 	showProductionCompanies: true,
@@ -45,13 +49,85 @@ export class SettingsTab extends PluginSettingTab {
 
 		containerEl.createEl('h2', {text: 'Front matter'});
 
+		const bannersDesc: DocumentFragment = sanitizeHTMLToDom(
+			'Adds the banner front matter to be used with the Banners plugin. '
+			+ '<p>Currently disabled due to <a href="https://github.com/noatpad/obsidian-banners/issues/105">a bug with the Banners plugin.</a>'
+		)
+
 		new Setting(containerEl)
 			.setName("User Banner")
-			.setDesc("Adds the banner front matter to be used with the Banners plugin.")
+			.setDesc(bannersDesc)
 			.addToggle(tgl => {
+				tgl.setDisabled(true)
 				tgl.setValue(this.settings.useBanner)
 				tgl.onChange(async (val) => {
 					this.settings.useBanner = val
+					await this.plugin.saveSettings()
+				})
+			})
+
+		new Setting(containerEl)
+			.setName("Add Meta")
+			.setDesc("Adds the id and name to the front matter.")
+			.addToggle(tgl => {
+				tgl.setValue(this.settings.addMeta)
+				tgl.onChange(async (val) => {
+					this.settings.addMeta = val
+					await this.plugin.saveSettings()
+				})
+			})
+
+		new Setting(containerEl)
+			.setName("Add Sort Title")
+			.setDesc(createFragment(desc => {
+				desc.appendText("Adds a custom sorting title to the frontmatter to be used with the ")
+				desc.createEl("a", { text: "Custom File Explorer sorting plugin", href: "https://obsidian.md/plugins?search=custom%20file%20explorer%20sorting#" })
+				desc.appendText(".")
+			}))
+			.addToggle(tgl => {
+				tgl.setValue(this.settings.addSortTitle)
+				tgl.onChange(async (val) => {
+					this.settings.addSortTitle = val
+					await this.plugin.saveSettings()
+					this.display()
+				})
+			})
+
+		const ignoreTheDesc: DocumentFragment = sanitizeHTMLToDom(
+				"Ignore the word 'the' at the beginning of titles. Custom File Explorer sorting plugin is required for this to work and a sortspec that targets 'sort-title'. "
+				+ '<a href="https://github.com/SebastianMC/obsidian-custom-sort/issues/80#issuecomment-1614750350">See this github issue for reference</a>'
+				+ '<br /><br />'
+				+ '<p>Example</p>'
+				+ '<code>sorting-spec: |<br />'
+				+ '&nbsp;&nbsp;target-folder: /<br />'
+				+ '&nbsp;&nbsp;< a-z by-metadata: sort-title'
+				+ '</code>'
+				+ '<br /><br />'
+			)
+			
+
+		if (this.settings.addSortTitle) {
+			new Setting(containerEl)
+				.setName("Ignore 'The' in Titles")
+				.setDesc(ignoreTheDesc)
+				.addToggle(tgl => {
+					tgl.setValue(this.settings.ignoreThe)
+					tgl.onChange(async val => {
+						this.settings.ignoreThe = val
+						await this.plugin.saveSettings()
+					})
+				})
+		}
+
+		containerEl.createEl('h2', {text: 'Collections'});
+
+		new Setting(containerEl)
+			.setName("Show Collections")
+			.setDesc("Adds the Collection section if the movie belongs to a Collection.")
+			.addToggle(tgl => {
+				tgl.setValue(this.settings.showCollections)
+				tgl.onChange(async (val) => {
+					this.settings.showCollections = val
 					await this.plugin.saveSettings()
 				})
 			})
