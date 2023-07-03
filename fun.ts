@@ -41,7 +41,6 @@ export async function WriteMediaToFile (movie: IMovieSearchResult, settings: Mov
   app.vault.adapter.append(fileName, xrn(`${movieDetail.overview}`))
   if (settings.showCast) {
 		app.vault.adapter.append(fileName, xrn("## Cast"))
-		debugger
     movieDetail.cast.forEach( (actor: IActor) => {
 			app.vault.adapter.append(fileName, xrn(`[[${actor.name}]] ${actor.character}`))
     })
@@ -52,7 +51,8 @@ export async function WriteMediaToFile (movie: IMovieSearchResult, settings: Mov
 			app.vault.adapter.append(fileName, `[[${pc.name}]] | `)
     })
   }
-	if (settings.showOwnedFormats) {
+	debugger
+	if (settings.showOwnedFormats && formatList.length > 0 && formatList[0] != "") {
 		app.vault.adapter.append(fileName, rnx(xrn("## Formats")))
 		app.vault.adapter.append(fileName, xrn(makeTagString(formatList)))
 	}

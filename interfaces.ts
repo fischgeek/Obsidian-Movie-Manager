@@ -6,7 +6,8 @@ export interface MovieManagerSettings {
 	castCount: number
 	showProductionCompanies: boolean
 	formats: string[]
-	showOwnedFormats: boolean
+	showOwnedFormats: boolean,
+	defaultFormatsToTrue: boolean
 }
 
 export interface IBook {

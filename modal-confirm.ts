@@ -22,19 +22,21 @@ export class ConfirmModal extends Modal {
 
 	onOpen() {
 		const { contentEl } = this
-		contentEl.createEl("h1", { text: "Confirm" })
+		contentEl.createEl("h1", { text: "Select your owned formats" })
 
 		this.settings.formats.forEach((format: string) => {
 			new Setting(contentEl)
 			.setName(format)
 			.addToggle((tgl) => {
+				if (this.settings.defaultFormatsToTrue) {
+					tgl.setValue(true)
+					this.formatList.push(format)
+				}
 				tgl.onChange((value:boolean) => {
 					// debugger
 					if (value == true) {
-						console.log('pushing ' + format)
 						this.formatList.push(format)
 					} else {
-						console.log('removing ' + format)
 						this.formatList.remove(format)
 					}
 				})
@@ -44,11 +46,10 @@ export class ConfirmModal extends Modal {
 		new Setting(contentEl)
 		.addButton((btn) =>
 			btn
-			.setButtonText("Confirm")
+			.setButtonText("Submit")
 			.setCta()
 			.onClick(() => {
 				this.close();
-				console.log('confirm modal: ' + this.result)
 				this.onSubmit(this.formatList.toString());
 			}));
 	}

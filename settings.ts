@@ -9,8 +9,9 @@ export const DEFAULT_SETTINGS: MovieManagerSettings = {
 	showCast: true,
 	castCount: 5,
 	showProductionCompanies: true,
+	showOwnedFormats: true,
 	formats: ["DVD", "Blu-ray", "Plex"],
-	showOwnedFormats: true
+	defaultFormatsToTrue: true
 }
 
 export class SettingsTab extends PluginSettingTab {
@@ -25,27 +26,12 @@ export class SettingsTab extends PluginSettingTab {
 
 	display(): void {
 		const {containerEl} = this;
-		let addToggle = (name: string, desc: string, boolVal: boolean) => {
-			new Setting(containerEl)
-					.setName(name)
-					.setDesc(desc)
-					.addToggle(tgl => {
-						tgl.setValue(boolVal)
-						tgl.onChange(async (val) => {
-							boolVal = val
-							await this.plugin.saveSettings()
-							console.log('saved settings')
-						})
-					})
-		}
-
-		containerEl.empty();
-
-		containerEl.createEl('h2', {text: 'Movie Manager'});
+		containerEl.empty()
+		// containerEl.createEl('h1', {text: 'Movie Manager'})
 
 		new Setting(containerEl)
 			.setName('API Key')
-			.setDesc('Your api key. Get one free at https://developer.themoviedb.org!')
+			.setDesc('Your API key. Get one free at https://developer.themoviedb.org!')
 			.addText(text => text
 				.setPlaceholder('api key')
 				.setValue(this.plugin.settings.apikey)
@@ -57,6 +43,8 @@ export class SettingsTab extends PluginSettingTab {
 				})
 			)
 
+		containerEl.createEl('h2', {text: 'Front matter'});
+
 		new Setting(containerEl)
 			.setName("User Banner")
 			.setDesc("Adds the banner front matter to be used with the Banners plugin.")
@@ -67,6 +55,8 @@ export class SettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings()
 				})
 			})
+
+		containerEl.createEl('h2', {text: 'Cast'});
 
 		new Setting(containerEl)
 			.setName("Show Cast")
@@ -93,6 +83,8 @@ export class SettingsTab extends PluginSettingTab {
 				})
 
 		}
+
+		containerEl.createEl('h2', {text: 'Production Companies'});
 		
 		new Setting(containerEl)
 			.setName("Show Production Companies")
@@ -105,6 +97,8 @@ export class SettingsTab extends PluginSettingTab {
 				})
 			})
 	
+		containerEl.createEl('h2', {text: 'Formats'});
+
 		new Setting(containerEl)
 			.setName("Show Formats")
 			.setDesc("Shows your Owned Formats section.")
@@ -116,7 +110,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.display()
 				})
 			})
-		
+
 		if (this.settings.showOwnedFormats) {
 			new Setting(containerEl)
 				.setName('Formats')
@@ -133,6 +127,16 @@ export class SettingsTab extends PluginSettingTab {
 							await this.plugin.saveSettings()
 					})
 				)
+			new Setting(containerEl)
+				.setName("Always Owned")
+				.setDesc("Set the Formats to always owned (true) in the Formats Modal.")
+				.addToggle(tgl => {
+					tgl.setValue(this.settings.defaultFormatsToTrue)
+					tgl.onChange(async val => {
+						this.settings.defaultFormatsToTrue = val
+						await this.plugin.saveSettings()
+					})
+				})
 		}
 	}
 }
