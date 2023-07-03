@@ -2,6 +2,17 @@ import { MovieManagerSettings } from "interfaces";
 import MovieManager from "main";
 import { App, PluginSettingTab, Setting } from "obsidian";
 
+export const DEFAULT_SETTINGS: MovieManagerSettings = {
+	apikey: '',
+	maxResults: 5,
+	useBanner: false,
+	showCast: true,
+	castCount: 5,
+	showProductionCompanies: true,
+	formats: ["DVD", "Blu-ray", "Plex"],
+	showOwnedFormats: true
+}
+
 export class SettingsTab extends PluginSettingTab {
 	plugin: MovieManager;
 	settings: MovieManagerSettings
@@ -67,6 +78,21 @@ export class SettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings()
 				})
 			})
+
+		if (this.settings.showCast) {
+			new Setting(containerEl)
+				.setName("Cast Count")
+				.setDesc("The number of cast members to include. Specify -1 for all.")
+				.addText(txt => {
+					txt.inputEl.type = 'number'
+					txt.setValue(this.settings.castCount.toString())
+					txt.onChange(async val => {
+						this.settings.castCount = parseInt(val)
+						await this.plugin.saveSettings()					
+					})
+				})
+
+		}
 		
 		new Setting(containerEl)
 			.setName("Show Production Companies")

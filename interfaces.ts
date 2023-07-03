@@ -3,6 +3,7 @@ export interface MovieManagerSettings {
 	maxResults: number
 	useBanner: boolean
 	showCast: boolean
+	castCount: number
 	showProductionCompanies: boolean
 	formats: string[]
 	showOwnedFormats: boolean

@@ -24,7 +24,7 @@ function createSearchResultsList (res: any) {
 	return resList
 }
 
-function createMediaResultList (x: any) {
+function createMediaResultList (x: any, settings: MovieManagerSettings) {
 	let genreList = [] as IGenre[]
 	let castList = [] as IActor[]
 	let prodList = [] as IProductionCompany[]
@@ -34,6 +34,7 @@ function createMediaResultList (x: any) {
 	x.credits.cast.forEach( (actor: IActor) => {
 		castList.push({id: actor.id, name: actor.name, character: actor.character})
 	})
+	castList = castList.slice(0, settings.castCount)
 	x.production_companies.forEach( (company: IProductionCompany) => {
 		prodList.push({id: company.id, name: company.name})
 	})
@@ -101,7 +102,7 @@ export async function GetMovieDetails (movieId: number, settings: MovieManagerSe
 
 	console.log(resj)
 
-	let resxx = createMediaResultList(resj)
+	let resxx = createMediaResultList(resj, settings)
 
 	return resxx
 }

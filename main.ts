@@ -2,20 +2,8 @@ import { App, Editor, MarkdownView, SuggestModal, Modal, Notice, Plugin, PluginS
 import { SearchMovie,GetMovieDetails } from 'tmdb'
 import { MovieManagerSettings,IBook,IMovieSearchResult, IGenre } from 'interfaces'
 import { WriteMediaToFile, truncate250 } from 'fun'
-import { SettingsTab } from 'settings'
+import { DEFAULT_SETTINGS, SettingsTab } from 'settings'
 import { ConfirmModal } from 'confirm'
-
-
-
-const DEFAULT_SETTINGS: MovieManagerSettings = {
-	apikey: '',
-	maxResults: 5,
-	useBanner: false,
-	showCast: true,
-	showProductionCompanies: true,
-	formats: ["DVD", "Blu-ray", "Plex"],
-	showOwnedFormats: true
-}
 
 export default class MovieManager extends Plugin {
 	settings: MovieManagerSettings;

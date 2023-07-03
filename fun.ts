@@ -41,8 +41,8 @@ export async function WriteMediaToFile (movie: IMovieSearchResult, settings: Mov
   app.vault.adapter.append(fileName, xrn(`${movieDetail.overview}`))
   if (settings.showCast) {
 		app.vault.adapter.append(fileName, xrn("## Cast"))
-    let sliced = movieDetail.cast.slice(0, 5)
-    sliced.forEach( (actor: IActor) =>{
+		debugger
+    movieDetail.cast.forEach( (actor: IActor) => {
 			app.vault.adapter.append(fileName, xrn(`[[${actor.name}]] ${actor.character}`))
     })
   }
