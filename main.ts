@@ -1,17 +1,16 @@
 import { App, Editor, MarkdownView, SuggestModal, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian'
-import { SearchMovie,GetMovieDetails } from 'search-movie'
+import { SearchMovie,GetMovieDetails } from 'tmdb'
 import { MovieManagerSettings,IBook,IMovieSearchResult, IGenre } from 'interfaces'
+import { WriteMediaToFile, truncate250 } from 'fun'
 
-function truncate (s: string, max: number) {
-	return s.substring(0, max)
-}
-function truncate250 (s: string) {
-	return truncate(s, 250)
-}
+
 
 const DEFAULT_SETTINGS: MovieManagerSettings = {
 	apikey: '',
-	maxResults: 5
+	maxResults: 5,
+	useBanner: false,
+	showCast: true,
+	showProductionCompanies: true
 }
 
 export default class MovieManager extends Plugin {
@@ -179,13 +178,45 @@ export class SearchModal extends Modal {
 	}
 }
 
-function makeGenreTagString (genres: IGenre[]) {
-	let str = ""
-	genres.forEach((genre: IGenre) => {
-		let g = genre.name.replace(" ", "")
-		str += `#${g} `
-	})
-	return str
+export class ConfirmModal extends Modal {
+	result: string;
+	onSubmit: (result: string) => void;
+  
+	constructor(app: App, onSubmit: (result: string) => void) {
+	  super(app);
+	  this.onSubmit = onSubmit;
+	}
+  
+	onOpen() {
+	  const { contentEl } = this;
+  
+	  contentEl.createEl("h1", { text: "Confirm" });
+		contentEl.createEl("checkbox", { text: "hello"})
+  
+	  new Setting(contentEl)
+		.setName("Title")
+		.addText((text) =>
+		  text.onChange((value) => {
+		  	 this.result = value
+		  })
+		);
+  
+	  new Setting(contentEl)
+		.addButton((btn) =>
+		  btn
+			.setButtonText("Confirm")
+			.setCta()
+			.onClick(() => {
+			  this.close();
+				console.log('confirm modal: ' + this.result)
+			  this.onSubmit(this.result);
+			}));
+	}
+  
+	onClose() {
+	  let { contentEl } = this;
+	  contentEl.empty();
+	}
 }
   
 export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
@@ -195,7 +226,6 @@ export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
 		super(app);
 		this.Movies = movies
 		this.settings = settings
-		// this.onChooseSuggestion = onChooseSuggestion
 	  }
 
 	getSuggestions(query: string): IMovieSearchResult[] {
@@ -215,19 +245,8 @@ export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
 	
 	// Perform action on the selected suggestion.
 	async onChooseSuggestion(movie: IMovieSearchResult, evt: MouseEvent | KeyboardEvent) {
-		new Notice(`Selected ${movie.title}`);
-		console.log('selected movie id: ' + movie.id)
-		let movieDetail = await GetMovieDetails(movie.id, this.settings)
-
-		
-
-		let content = `${makeGenreTagString(movieDetail.genres)}
-		![](${movieDetail.posterUrl})
-		${movieDetail.overview}`
-		let fileName = movieDetail.title + ".md"
-		// app.vault.adapter.exists(fileName)
-		app.vault.adapter.write(fileName, content)
-		// app.vault.create(fileName, movieDetail.overview)
+		let res = new ConfirmModal(this.app, () => "").open()
+		//WriteMediaToFile(movie, this.settings)
 	}
 }
 

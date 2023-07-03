@@ -1,5 +1,5 @@
 import { request } from "obsidian"
-import { IGenre, IMediaDetail, IMovieSearchResult, MovieManagerSettings } from "interfaces"
+import { IActor, IGenre, IMediaDetail, IMovieSearchResult, IProductionCompany, MovieManagerSettings } from "interfaces"
 
 const baseUrl = "https://api.themoviedb.org/3"
 
@@ -11,7 +11,7 @@ function getSizedImage (size: string, uri: string) {
 function createSearchResultsList (res: any) {
 	let resList = [] as IMovieSearchResult[]
 	res.results.forEach( (movieResult: any) => {
-		console.log('movie id: ' + movieResult.id)
+		// console.log('movie id: ' + movieResult.id)
 		// let mr = new MovieSearchResult(movieResult.id, movieResult.title, movieResult.overview)
 		let x : IMovieSearchResult = {
 			id: movieResult.id,
@@ -26,25 +26,37 @@ function createSearchResultsList (res: any) {
 
 function createMediaResultList (x: any) {
 	let genreList = [] as IGenre[]
+	let castList = [] as IActor[]
+	let prodList = [] as IProductionCompany[]
 	x.genres.forEach( (genre: IGenre) =>
 		genreList.push({id: genre.id, name: genre.name})
 	)
+	x.credits.cast.forEach( (actor: IActor) => {
+		castList.push({id: actor.id, name: actor.name, character: actor.character})
+	})
+	x.production_companies.forEach( (company: IProductionCompany) => {
+		prodList.push({id: company.id, name: company.name})
+	})
 	let md : IMediaDetail = {
 		id: x.id,
-		backdropUrl: x.backdrop_url,
+		backdropUrl: getSizedImage("original", x.backdrop_path),
 		overview: x.overview,
 		posterUrl: getSizedImage("w200", x.poster_path),
 		releaseDate: x.release_date,
 		runtime: x.runtime,
 		tagline: x.tagline,
 		title: x.title,
-		genres: genreList
+		genres: genreList,
+		cast: castList,
+		productionCompanies: prodList
 	}
 	return md
 }
 
 export async function SearchMovie (title: string, settings: MovieManagerSettings) {
 	console.log('searching for ' + title)
+	debugger
+	console.log('using api key: ' + settings.apikey)
 
 	let xurl = new URL(baseUrl + "/search/movie")
 	xurl.searchParams.append("query", title)
@@ -71,6 +83,7 @@ export async function SearchMovie (title: string, settings: MovieManagerSettings
 
 export async function GetMovieDetails (movieId: number, settings: MovieManagerSettings) {
 	console.log('searching for movie by id ' + movieId)
+	console.log('using api key: ' + settings.apikey)
 
 	let xurl = new URL(`${baseUrl}/movie/${movieId}`)
 	xurl.searchParams.append("append_to_response", "credits")
