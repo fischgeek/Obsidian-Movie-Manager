@@ -1,6 +1,5 @@
-import { appendFileSync } from "fs"
-import { IActor, IGenre, IKeyValuePair, IMediaDetail, IMovieSearchResult, IProductionCompany, MovieManagerSettings } from "interfaces"
-import { DataAdapter, Notice, WorkspaceLeaf } from "obsidian"
+import { IActor, IGenre, IKeyValuePair, IMovieSearchResult, IProductionCompany, MovieManagerSettings } from "interfaces"
+import { Notice } from "obsidian"
 import { GetMovieDetails } from "tmdb"
 
 function truncate (s: string, max: number) {

@@ -1,18 +1,18 @@
-import { Modal, App, Setting } from "obsidian";
+import { Modal, App, Setting } from "obsidian"
 
 export class SearchModal extends Modal {
-	result: string;
-	onSubmit: (result: string) => void;
+	result: string
+	onSubmit: (result: string) => void
 	
 	constructor(app: App, onSubmit: (result: string) => void) {
-		super(app);
-		this.onSubmit = onSubmit;
+		super(app)
+		this.onSubmit = onSubmit
 	}
 	
 	onOpen() {
-		const { contentEl } = this;
+		const { contentEl } = this
 	
-		contentEl.createEl("h1", { text: "Movie title" });
+		contentEl.createEl("h1", { text: "Movie title" })
 	
 		new Setting(contentEl)
 		.setName("Title")
@@ -20,7 +20,7 @@ export class SearchModal extends Modal {
 			text.onChange((value) => {
 				 this.result = value
 			})
-		);
+		)
 	
 		new Setting(contentEl)
 		.addButton((btn) =>
@@ -28,13 +28,13 @@ export class SearchModal extends Modal {
 			.setButtonText("Search")
 			.setCta()
 			.onClick(() => {
-				this.close();
-				this.onSubmit(this.result);
-			}));
+				this.close()
+				this.onSubmit(this.result)
+			}))
 	}
 	
 	onClose() {
-		let { contentEl } = this;
-		contentEl.empty();
+		let { contentEl } = this
+		contentEl.empty()
 	}
 }

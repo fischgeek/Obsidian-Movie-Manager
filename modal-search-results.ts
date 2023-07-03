@@ -1,20 +1,20 @@
-import { truncate250, WriteMediaToFile } from "fun";
-import { IMovieSearchResult, MovieManagerSettings } from "interfaces";
-import { ConfirmModal } from "modal-confirm";
-import { SuggestModal, App } from "obsidian";
+import { truncate250, WriteMediaToFile } from "fun"
+import { IMovieSearchResult, MovieManagerSettings } from "interfaces"
+import { ConfirmModal } from "modal-confirm"
+import { SuggestModal, App } from "obsidian"
 
 export class SearchResultModal extends SuggestModal<IMovieSearchResult> {
 	Movies: IMovieSearchResult[]
 	settings: MovieManagerSettings
 	constructor(app: App, movies: IMovieSearchResult[], settings: MovieManagerSettings) {
-		super(app);
+		super(app)
 		this.Movies = movies
 		this.settings = settings
 		}
 
 	getSuggestions(query: string): IMovieSearchResult[] {
 		return this.Movies.filter((movie) =>
-		movie.title.toLowerCase().includes(query.toLowerCase()));
+		movie.title.toLowerCase().includes(query.toLowerCase()))
 	}
 	
 	// Renders each suggestion item.

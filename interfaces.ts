@@ -6,6 +6,7 @@ export interface MovieManagerSettings {
 	addSortTitle: boolean
 	ignoreThe: boolean
 	showCollections: boolean
+	createCollectionFile: boolean
 	showCast: boolean
 	castCount: number
 	showProductionCompanies: boolean

@@ -1,4 +1,4 @@
-import { Editor, MarkdownView, Notice, Plugin } from 'obsidian'
+import { Notice, Plugin } from 'obsidian'
 import { SearchMovie } from 'tmdb'
 import { MovieManagerSettings } from 'interfaces'
 import { DEFAULT_SETTINGS, SettingsTab } from 'settings'
@@ -8,7 +8,6 @@ import { SearchResultModal } from 'modal-search-results'
 /*
 [ ] handle movies with same names
 [ ] handle tv series
-[ ] handle collections
 [ ] cast as links option
 [ ] prodcution companies as links option
 [ ] production company delimiter
@@ -17,25 +16,26 @@ import { SearchResultModal } from 'modal-search-results'
 [ ] show movie count in status bar
 [/] defaults for formats // half done. would like to do this per format (dynamically)
 [x] refresh the focused movie (tab)
+[x] handle collections
 */
 
 export default class MovieManager extends Plugin {
-	settings: MovieManagerSettings;
+	settings: MovieManagerSettings
 
 	async onload() {
-		await this.loadSettings();
+		await this.loadSettings()
 
 		// // This creates an icon in the left ribbon.
 		// const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
 		// 	// Called when the user clicks the icon.
-		// 	new Notice('This is a notice!');
-		// });
+		// 	new Notice('This is a notice!')
+		// })
 		// Perform additional things with the ribbon
-		// ribbonIconEl.addClass('my-plugin-ribbon-class');
+		// ribbonIconEl.addClass('my-plugin-ribbon-class')
 
 		// // This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		// const statusBarItemEl = this.addStatusBarItem();
-		// statusBarItemEl.setText('Status Bar Text');
+		// const statusBarItemEl = this.addStatusBarItem()
+		// statusBarItemEl.setText('Status Bar Text')
 
 		this.addCommand({
 			id: 'add-movie',
@@ -71,17 +71,17 @@ export default class MovieManager extends Plugin {
 		// 	id: 'sample-editor-command',
 		// 	name: 'Sample editor command',
 		// 	editorCallback: async (editor: Editor, view: MarkdownView) => {
-		// 		// console.log(editor.getSelection());
+		// 		// console.log(editor.getSelection())
 		// 		// console.log('current file: ' + view.file.basename)
 		// 		// let metadata = this.app.metadataCache.getFileCache(view.file)?.frontmatter
 		// 		// console.log(metadata)
 		// 		// let title = metadata?.sort_titles
 		// 		// console.log(title)
-		// 		// editor.replaceSelection('Sample Editor Command');
+		// 		// editor.replaceSelection('Sample Editor Command')
 		// 		let movieSearchResults = await SearchMovie(view.file.basename, this.settings)
 		// 		new SearchResultModal(this.app, movieSearchResults, this.settings).open()
 		// 	}
-		// });
+		// })
 		
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
 		// this.addCommand({
@@ -89,35 +89,35 @@ export default class MovieManager extends Plugin {
 		// 	name: 'Open sample modal (complex)',
 		// 	checkCallback: (checking: boolean) => {
 		// 		// Conditions to check
-		// 		const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+		// 		const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView)
 		// 		if (markdownView) {
 		// 			// If checking is true, we're simply "checking" if the command can be run.
 		// 			// If checking is false, then we want to actually perform the operation.
 		// 			if (!checking) {
-		// 				// new SampleModal(this.app).open();
+		// 				// new SampleModal(this.app).open()
 		// 			}
 
 		// 			// This command will only show up in Command Palette when the check function returns true
-		// 			return true;
+		// 			return true
 		// 		}
 		// 	}
-		// });
+		// })
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SettingsTab(this.app, this));
+		this.addSettingTab(new SettingsTab(this.app, this))
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
 		// this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			// console.log('click', evt);
-		// });
+			// console.log('click', evt)
+		// })
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		// this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+		// this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000))
 
 		// this.addRibbonIcon('dice', 'Hello World', () => {
-		// 	new Notice('Hello, world!');
-		// });
+		// 	new Notice('Hello, world!')
+		// })
 	}
 
 	onunload() {
@@ -125,10 +125,10 @@ export default class MovieManager extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData())
 	}
 
 	async saveSettings() {
-		await this.saveData(this.settings);
+		await this.saveData(this.settings)
 	}
 }

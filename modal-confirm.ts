@@ -1,9 +1,9 @@
-import { MovieManagerSettings } from "interfaces";
-import { Modal, App, Setting } from "obsidian";
+import { MovieManagerSettings } from "interfaces"
+import { Modal, App, Setting } from "obsidian"
 
 export class ConfirmModal extends Modal {
-	result: string;
-	onSubmit: (result: string) => void;
+	result: string
+	onSubmit: (result: string) => void
 	settings: MovieManagerSettings
 	formatList: string[]
 	
@@ -49,13 +49,13 @@ export class ConfirmModal extends Modal {
 			.setButtonText("Submit")
 			.setCta()
 			.onClick(() => {
-				this.close();
-				this.onSubmit(this.formatList.toString());
-			}));
+				this.close()
+				this.onSubmit(this.formatList.toString())
+			}))
 	}
 	
 	onClose() {
-		let { contentEl } = this;
-		contentEl.empty();
+		let { contentEl } = this
+		contentEl.empty()
 	}
 }

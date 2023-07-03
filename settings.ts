@@ -1,6 +1,6 @@
-import { MovieManagerSettings } from "interfaces";
-import MovieManager from "main";
-import { App, PluginSettingTab, sanitizeHTMLToDom, Setting } from "obsidian";
+import { MovieManagerSettings } from "interfaces"
+import MovieManager from "main"
+import { App, PluginSettingTab, sanitizeHTMLToDom, Setting } from "obsidian"
 
 export const DEFAULT_SETTINGS: MovieManagerSettings = {
 	apikey: '',
@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS: MovieManagerSettings = {
 	addSortTitle: true,
 	ignoreThe: true,
 	showCollections: true,
+	createCollectionFile: false,
 	showCast: true,
 	castCount: 5,
 	showProductionCompanies: true,
@@ -19,17 +20,17 @@ export const DEFAULT_SETTINGS: MovieManagerSettings = {
 }
 
 export class SettingsTab extends PluginSettingTab {
-	plugin: MovieManager;
+	plugin: MovieManager
 	settings: MovieManagerSettings
 
 	constructor(app: App, plugin: MovieManager) {
-		super(app, plugin);
-		this.plugin = plugin;
+		super(app, plugin)
+		this.plugin = plugin
 		this.settings = plugin.settings
 	}
 
 	display(): void {
-		const {containerEl} = this;
+		const {containerEl} = this
 		containerEl.empty()
 		// containerEl.createEl('h1', {text: 'Movie Manager'})
 
@@ -47,7 +48,7 @@ export class SettingsTab extends PluginSettingTab {
 				})
 			)
 
-		containerEl.createEl('h2', {text: 'Front matter'});
+		containerEl.createEl('h2', {text: 'Front matter'})
 
 		const bannersDesc: DocumentFragment = sanitizeHTMLToDom(
 			'Adds the banner front matter to be used with the Banners plugin. '
@@ -99,8 +100,8 @@ export class SettingsTab extends PluginSettingTab {
 				+ '<br /><br />'
 				+ '<p>Example</p>'
 				+ '<code>sorting-spec: |<br />'
-				+ '&nbsp;&nbsp;target-folder: /<br />'
-				+ '&nbsp;&nbsp;< a-z by-metadata: sort-title'
+				+ '&nbsp&nbsptarget-folder: /<br />'
+				+ '&nbsp&nbsp< a-z by-metadata: sort-title'
 				+ '</code>'
 				+ '<br /><br />'
 			)
@@ -119,7 +120,7 @@ export class SettingsTab extends PluginSettingTab {
 				})
 		}
 
-		containerEl.createEl('h2', {text: 'Collections'});
+		containerEl.createEl('h2', {text: 'Collections'})
 
 		new Setting(containerEl)
 			.setName("Show Collections")
@@ -132,7 +133,7 @@ export class SettingsTab extends PluginSettingTab {
 				})
 			})
 
-		containerEl.createEl('h2', {text: 'Cast'});
+		containerEl.createEl('h2', {text: 'Cast'})
 
 		new Setting(containerEl)
 			.setName("Show Cast")
@@ -160,7 +161,7 @@ export class SettingsTab extends PluginSettingTab {
 
 		}
 
-		containerEl.createEl('h2', {text: 'Production Companies'});
+		containerEl.createEl('h2', {text: 'Production Companies'})
 		
 		new Setting(containerEl)
 			.setName("Show Production Companies")
@@ -173,7 +174,7 @@ export class SettingsTab extends PluginSettingTab {
 				})
 			})
 	
-		containerEl.createEl('h2', {text: 'Formats'});
+		containerEl.createEl('h2', {text: 'Formats'})
 
 		new Setting(containerEl)
 			.setName("Show Formats")
@@ -212,6 +213,16 @@ export class SettingsTab extends PluginSettingTab {
 						this.settings.defaultFormatsToTrue = val
 						await this.plugin.saveSettings()
 					})
+				})
+
+			containerEl.createEl('h2', {text: 'Coming soon!'})
+
+			new Setting(containerEl)
+				.setName("Create Collection File")
+				.setDesc("Fetch Collection information and create the file when detected in a movie that belongs to a collection.")
+				.addToggle(tgl => {
+					tgl.setValue(false)
+					tgl.setDisabled(true)
 				})
 		}
 	}
