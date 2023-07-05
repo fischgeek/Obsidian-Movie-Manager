@@ -20,7 +20,13 @@ export interface IKeyValuePair {
 	value: string
 }
 
-export interface IMovieSearchResult {
+export enum MediaType {
+	Movie = "movie",
+	TV = "tv",
+	Collection = "collection"
+}
+
+export interface IMediaSearchResult {
 	id: number
 	title: string
 	overview: string

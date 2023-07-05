@@ -1,5 +1,5 @@
 import { request } from "obsidian"
-import { IActor, IGenre, IMediaDetail, IMovieSearchResult, IProductionCompany, MovieManagerSettings } from "interfaces"
+import { IActor, IGenre, IMediaDetail, IMediaSearchResult, IProductionCompany, MediaType, MovieManagerSettings } from "interfaces"
 
 const baseUrl = "https://api.themoviedb.org/3"
 
@@ -9,11 +9,9 @@ function getSizedImage (size: string, uri: string) {
 }
 
 function createSearchResultsList (res: any) {
-	let resList = [] as IMovieSearchResult[]
+	let resList = [] as IMediaSearchResult[]
 	res.results.forEach( (movieResult: any) => {
-		// console.log('movie id: ' + movieResult.id)
-		// let mr = new MovieSearchResult(movieResult.id, movieResult.title, movieResult.overview)
-		let x : IMovieSearchResult = {
+		let x : IMediaSearchResult = {
 			id: movieResult.id,
 			title: movieResult.title, 
 			overview: movieResult.overview,
@@ -25,6 +23,7 @@ function createSearchResultsList (res: any) {
 }
 
 function createMediaResultList (x: any, settings: MovieManagerSettings) {
+	// FIX THIS TO HANDLE MEDIA TYPES!
 	let genreList = [] as IGenre[]
 	let castList = [] as IActor[]
 	let prodList = [] as IProductionCompany[]
@@ -55,12 +54,11 @@ function createMediaResultList (x: any, settings: MovieManagerSettings) {
 	return md
 }
 
-export async function SearchMovie (title: string, settings: MovieManagerSettings) {
-	console.log('searching for ' + title)
-	// debugger
+async function SearchMedia (title: string, mediaType: MediaType, settings: MovieManagerSettings) {
+	console.log('searching for ' + title + " as " + mediaType.toString())
 	console.log('using api key: ' + settings.apikey)
 
-	let xurl = new URL(baseUrl + "/search/movie")
+	let xurl = new URL(`${baseUrl}/search/${mediaType.toString()}`)
 	xurl.searchParams.append("query", title)
 	xurl.searchParams.append("language", "en-US")
 	xurl.searchParams.append("page", "1")
@@ -75,12 +73,17 @@ export async function SearchMovie (title: string, settings: MovieManagerSettings
 	})
 
 	let resj = JSON.parse(resx)
-
-	console.log(resj)
-
 	let resxx = createSearchResultsList(resj)
 
 	return resxx
+}
+
+export async function SearchMovie (title: string, settings: MovieManagerSettings) {
+	return SearchMedia(title, MediaType.Movie, settings)
+}
+
+export async function SearchTV (title: string, settings: MovieManagerSettings) {
+	return SearchMedia(title, MediaType.TV, settings)
 }
 
 export async function GetMovieDetails (movieId: number, settings: MovieManagerSettings) {

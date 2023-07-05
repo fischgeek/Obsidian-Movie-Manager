@@ -53,6 +53,22 @@ export default class MovieManager extends Plugin {
 			}
 		})
 
+		this.addCommand({
+			id: 'add-tv',
+			name: 'Add a TV Series',
+			callback: () => {
+				new SearchModal(this.app, async (result) => {
+					console.log('apikey: ' + this.settings.apikey)
+					if (!this.settings.apikey) {
+						new Notice('Missing API Key')
+					} else {
+						let tvSearchResults = await SearchTV(result, this.settings)
+						new SearchResultModal(this.app, tvSearchResults, this.settings).open()
+					}
+					}).open()
+			}
+		})
+
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
 			id: 'rescan-active-title',
