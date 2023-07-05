@@ -8,21 +8,25 @@ function getSizedImage (size: string, uri: string) {
 	return `${posterBaseUrl}/${size}/${uri}`
 }
 
-function createSearchResultsList (res: any) {
+function createSearchResultsList (res: any, mediaType: MediaType) {
 	let resList = [] as IMediaSearchResult[]
-	res.results.forEach( (movieResult: any) => {
+	res.results.forEach( (mediaItem: any) => {
+		let titleAttr = mediaItem.title
+		if (mediaType == MediaType.TV) {
+			titleAttr = mediaItem.name
+		}
 		let x : IMediaSearchResult = {
-			id: movieResult.id,
-			title: movieResult.title, 
-			overview: movieResult.overview,
-			posterUrl: getSizedImage("w200", movieResult.poster_path)
+			id: mediaItem.id,
+			title: titleAttr,
+			overview: mediaItem.overview,
+			posterUrl: getSizedImage("w200", mediaItem.poster_path)
 		}
 		resList.push(x)
 	})
 	return resList
 }
 
-function createMediaResultList (x: any, settings: MovieManagerSettings) {
+function createMediaDetailResultList (x: any, settings: MovieManagerSettings, mediaType: MediaType) {
 	// FIX THIS TO HANDLE MEDIA TYPES!
 	let genreList = [] as IGenre[]
 	let castList = [] as IActor[]
@@ -73,7 +77,7 @@ async function SearchMedia (title: string, mediaType: MediaType, settings: Movie
 	})
 
 	let resj = JSON.parse(resx)
-	let resxx = createSearchResultsList(resj)
+	let resxx = createSearchResultsList(resj, mediaType)
 
 	return resxx
 }

@@ -64,6 +64,21 @@ export interface IMediaDetail {
 	collection: string
 }
 
+export interface ITVDetail {
+	id: number
+	backdropUrl: string
+	overview: string
+	posterUrl: string
+	releaseDate: string
+	tagline: string
+	title: string
+	genres: IGenre[]
+	cast: IActor[]
+	productionCompanies: IProductionCompany[]
+	seasons: any
+	episodeCount: number
+}
+
 export interface ConfirmFormats {
 	selectedFormats: string[]
 }

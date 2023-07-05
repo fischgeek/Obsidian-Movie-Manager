@@ -111,7 +111,4 @@ export async function WriteMediaToFile (movie: IMovieSearchResult, settings: Mov
   addFormats()
 	
 }
-function substr(title: string) {
-	throw new Error("Function not implemented.")
-}
 
