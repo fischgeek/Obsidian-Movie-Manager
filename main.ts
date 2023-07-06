@@ -7,7 +7,7 @@ import { SearchResultModal } from 'modal-search-results'
 
 /*
 SUBMISSION READY
-[ ] handle movies with same names
+[/] handle movies with same names // need better logic to compare id's and only do if different
 [ ] genres as tags option
 [ ] cast as links option
 [ ] seasons as links option
