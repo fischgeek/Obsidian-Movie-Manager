@@ -15,6 +15,7 @@ SUBMISSION READY
 [ ] formats as tags option
 [ ] production company delimiter / display option [flat,bullet]
 [ ] seasons delimiter / display option [flat,bullet]
+[ ] clickable link to themoviedb.org in settings
 WOULD LIKE TO
 [/] defaults for formats // half done. would like to do this per format (dynamically)
 DONE
