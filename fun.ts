@@ -11,8 +11,13 @@ let initSettings = (x: MovieManagerSettings) => {
 	_settings = x
 }
 
-let makeFileNameValid = (fname: string) => {
-	return fname.replace(/[/\\?%*:|"<>]/g, "")
+let makeFileNameValid = async (fname: string, year: string) => {
+	let xname = fname.replace(/[/\\?%*:|"<>]/g, "")
+	if (await adapter.exists(xname + ".md")) {
+		let yr = year.substring(0, 4)
+		xname = `${xname} (${yr})`
+	}
+	return xname + ".md"
 }
 
 function truncate (s: string, max: number) {
@@ -124,7 +129,9 @@ export async function WriteMovieMediaToFile (media: IMediaSearchResult, settings
 	let movieDetailFull = await GetMovieDetails(media.id, settings)
 	let movieDetail = movieDetailFull.mediaDetails
 	_mediaDetailBase = movieDetail
-	_fileName = makeFileNameValid(media.title + ".md")
+	_fileName = await makeFileNameValid(media.title, movieDetail.releaseDate)
+
+	debugger
 
 	addMeta(MediaType.Movie)
 	addGenres()
@@ -143,9 +150,7 @@ export async function WriteTVMediaToFile (media: IMediaSearchResult, settings: M
 	let tvDetailFull = await GetTVDetails(media.id, settings)
 	let tvDetail = tvDetailFull.mediaDetails
 	_mediaDetailBase = tvDetail
-	_fileName = makeFileNameValid(media.title + ".md")
-
-	debugger
+	_fileName = await makeFileNameValid(media.title, tvDetail.releaseDate)
 
 	addMeta(MediaType.TV)
 	addGenres()

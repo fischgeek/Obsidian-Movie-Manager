@@ -6,17 +6,22 @@ import { SearchModal } from 'modal-search'
 import { SearchResultModal } from 'modal-search-results'
 
 /*
+SUBMISSION READY
 [ ] handle movies with same names
-[ ] handle tv series
-[ ] cast as links option
-[ ] prodcution companies as links option
-[ ] production company delimiter
-[ ] formats as tags option
 [ ] genres as tags option
+[ ] cast as links option
+[ ] seasons as links option
+[ ] prodcution companies as links option
+[ ] formats as tags option
+[ ] production company delimiter / display option [flat,bullet]
+[ ] seasons delimiter / display option [flat,bullet]
+WOULD LIKE TO
 [ ] show movie count in status bar
 [/] defaults for formats // half done. would like to do this per format (dynamically)
+DONE
 [x] refresh the focused movie (tab)
 [x] handle collections
+[x] handle tv series
 */
 
 export default class MovieManager extends Plugin {
