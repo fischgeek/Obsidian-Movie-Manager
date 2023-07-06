@@ -1,6 +1,6 @@
 import { Notice, Plugin } from 'obsidian'
-import { SearchMovie } from 'tmdb'
-import { MovieManagerSettings } from 'interfaces'
+import { SearchMovie, SearchTV } from 'tmdb'
+import { MediaType, MovieManagerSettings } from 'interfaces'
 import { DEFAULT_SETTINGS, SettingsTab } from 'settings'
 import { SearchModal } from 'modal-search'
 import { SearchResultModal } from 'modal-search-results'
@@ -47,37 +47,48 @@ export default class MovieManager extends Plugin {
 						new Notice('Missing API Key')
 					} else {
 						let movieSearchResults = await SearchMovie(result, this.settings)
-						new SearchResultModal(this.app, movieSearchResults, this.settings).open()
+						new SearchResultModal(this.app, movieSearchResults, this.settings, MediaType.Movie).open()
 					}
 					}).open()
 			}
 		})
 
-		// this.addCommand({
-		// 	id: 'add-tv',
-		// 	name: 'Add a TV Series',
-		// 	callback: () => {
-		// 		new SearchModal(this.app, async (result) => {
-		// 			console.log('apikey: ' + this.settings.apikey)
-		// 			if (!this.settings.apikey) {
-		// 				new Notice('Missing API Key')
-		// 			} else {
-		// 				let tvSearchResults = await SearchTV(result, this.settings)
-		// 				new SearchResultModal(this.app, tvSearchResults, this.settings).open()
-		// 			}
-		// 			}).open()
-		// 	}
-		// })
+		this.addCommand({
+			id: 'add-tv',
+			name: 'Add a TV Series',
+			callback: () => {
+				new SearchModal(this.app, async (result) => {
+					console.log('apikey: ' + this.settings.apikey)
+					if (!this.settings.apikey) {
+						new Notice('Missing API Key')
+					} else {
+						let tvSearchResults = await SearchTV(result, this.settings)
+						new SearchResultModal(this.app, tvSearchResults, this.settings, MediaType.TV).open()
+					}
+					}).open()
+			}
+		})
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
 			id: 'rescan-active-title',
 			name: 'Rescan Active Title',
 			callback: async () => {
-				let activeTitle = this.app.workspace.getActiveFile()?.basename
+				let activeTitle = this.app.workspace.getActiveFile()
 				if (activeTitle) {
-					let movieSearchResults = await SearchMovie(activeTitle, this.settings)
-					new SearchResultModal(this.app, movieSearchResults, this.settings).open()
+					let metadata = this.app.metadataCache.getFileCache(activeTitle)?.frontmatter
+					let mediaType = MediaType.Movie
+					if (metadata?.media_type) {
+						mediaType = metadata?.media_type
+					}
+					if (mediaType == MediaType.Movie) {
+						let movieSearchResults = await SearchMovie(activeTitle.basename, this.settings)
+						new SearchResultModal(this.app, movieSearchResults, this.settings, MediaType.Movie).open()
+					} else {
+						let tvSearchResults = await SearchTV(activeTitle.basename, this.settings)
+						new SearchResultModal(this.app, tvSearchResults, this.settings, MediaType.TV).open()
+					}
+					
 				}
 			}
 		})

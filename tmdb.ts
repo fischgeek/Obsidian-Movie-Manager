@@ -1,5 +1,5 @@
 import { request } from "obsidian"
-import { IActor, IGenre, IMediaDetail, IMediaSearchResult, IProductionCompany, MediaType, MovieManagerSettings } from "interfaces"
+import { IActor, IGenre, IMediaDetailBase, IMediaSearchResult, IMovieDetail, IProductionCompany, ISeason, ITVDetail, MediaType, MovieManagerSettings } from "interfaces"
 
 const baseUrl = "https://api.themoviedb.org/3"
 
@@ -26,8 +26,7 @@ function createSearchResultsList (res: any, mediaType: MediaType) {
 	return resList
 }
 
-function createMediaDetailResultList (x: any, settings: MovieManagerSettings, mediaType: MediaType) {
-	// FIX THIS TO HANDLE MEDIA TYPES!
+function createMediaDetailResult (x: any, settings: MovieManagerSettings) {
 	let genreList = [] as IGenre[]
 	let castList = [] as IActor[]
 	let prodList = [] as IProductionCompany[]
@@ -41,7 +40,11 @@ function createMediaDetailResultList (x: any, settings: MovieManagerSettings, me
 	x.production_companies.forEach( (company: IProductionCompany) => {
 		prodList.push({id: company.id, name: company.name})
 	})
-	let md : IMediaDetail = {
+	let title = x.title
+	if (title === undefined && x.name != "") {
+		title = x.name
+	}
+	let mdb : IMediaDetailBase = {
 		id: x.id,
 		backdropUrl: getSizedImage("original", x.backdrop_path),
 		overview: x.overview,
@@ -49,13 +52,42 @@ function createMediaDetailResultList (x: any, settings: MovieManagerSettings, me
 		releaseDate: x.release_date,
 		runtime: x.runtime,
 		tagline: x.tagline,
-		title: x.title,
+		title: title,
 		genres: genreList,
 		cast: castList,
-		productionCompanies: prodList,
-		collection: x.belongs_to_collection.name
+		productionCompanies: prodList
+	}
+	return mdb
+}
+
+function createMovieDetails (x: any, settings: MovieManagerSettings) {
+	let md : IMovieDetail = {
+		mediaDetails: createMediaDetailResult(x, settings),
+		collection: (x.belongs_to_collection == null ? "" : x.belongs_to_collection.name)
 	}
 	return md
+}
+
+function createTVDetails (tv: any, settings: MovieManagerSettings) {
+	let seasonList = [] as ISeason[]
+	tv.seasons.forEach( (x: any) => {
+		seasonList.push({
+			id: x.id, 
+			airDate: x.first_air_date, 
+			episodeCount: x.number_of_episodes,
+			title: x.name,
+			overview: x.overview,
+			posterUrl: getSizedImage("w200", x.poster_path),
+			season: x.season_number
+		})
+	})
+	debugger
+	let tvd : ITVDetail = {
+		mediaDetails: createMediaDetailResult(tv, settings),
+		episodeCount: 0,
+		seasons: seasonList
+	}
+	return tvd
 }
 
 async function SearchMedia (title: string, mediaType: MediaType, settings: MovieManagerSettings) {
@@ -90,11 +122,11 @@ export async function SearchTV (title: string, settings: MovieManagerSettings) {
 	return SearchMedia(title, MediaType.TV, settings)
 }
 
-export async function GetMovieDetails (movieId: number, settings: MovieManagerSettings) {
-	console.log('searching for movie by id ' + movieId)
+async function GetMediaDetails (mediaId: number, settings: MovieManagerSettings, mediaType: MediaType) {
+	console.log('searching for media by id ' + mediaId)
 	console.log('using api key: ' + settings.apikey)
 
-	let xurl = new URL(`${baseUrl}/movie/${movieId}`)
+	let xurl = new URL(`${baseUrl}/${mediaType}/${mediaId}`)
 	xurl.searchParams.append("append_to_response", "credits")
 	xurl.searchParams.append("language", "en-US")
 	xurl.searchParams.append("api_key", settings.apikey)
@@ -107,10 +139,17 @@ export async function GetMovieDetails (movieId: number, settings: MovieManagerSe
 	})
 
 	let resj = JSON.parse(resx)
+	return resj
+}
 
-	console.log(resj)
+export async function GetMovieDetails (mediaId: number, settings: MovieManagerSettings) {
+	let resj = await GetMediaDetails(mediaId, settings, MediaType.Movie)
+	let movieDetail = createMovieDetails(resj, settings)
+	return movieDetail
+}
 
-	let resxx = createMediaResultList(resj, settings)
-
-	return resxx
+export async function GetTVDetails (mediaId: number, settings: MovieManagerSettings) {
+	let resj = await GetMediaDetails(mediaId, settings, MediaType.TV)
+	let tvDetail = createTVDetails(resj, settings)
+	return tvDetail
 }

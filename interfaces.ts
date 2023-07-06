@@ -12,7 +12,8 @@ export interface MovieManagerSettings {
 	showProductionCompanies: boolean
 	formats: string[]
 	showOwnedFormats: boolean,
-	defaultFormatsToTrue: boolean
+	defaultFormatsToTrue: boolean,
+	formatList: string[]
 }
 
 export interface IKeyValuePair {
@@ -49,7 +50,17 @@ export interface IProductionCompany {
 	name: string
 }
 
-export interface IMediaDetail {
+export interface ISeason {
+	id: number
+	airDate: string
+	episodeCount: number
+	title: string
+	overview: string
+	posterUrl: string
+	season: number
+}
+
+export interface IMediaDetailBase {
 	id: number
 	backdropUrl: string
 	overview: string
@@ -61,22 +72,17 @@ export interface IMediaDetail {
 	genres: IGenre[]
 	cast: IActor[]
 	productionCompanies: IProductionCompany[]
+}
+
+export interface IMovieDetail {
+	mediaDetails: IMediaDetailBase
 	collection: string
 }
 
 export interface ITVDetail {
-	id: number
-	backdropUrl: string
-	overview: string
-	posterUrl: string
-	releaseDate: string
-	tagline: string
-	title: string
-	genres: IGenre[]
-	cast: IActor[]
-	productionCompanies: IProductionCompany[]
-	seasons: any
+	mediaDetails: IMediaDetailBase
 	episodeCount: number
+	seasons: ISeason[]	
 }
 
 export interface ConfirmFormats {
