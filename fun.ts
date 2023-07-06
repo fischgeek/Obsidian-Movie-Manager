@@ -1,25 +1,64 @@
 import { IActor, IGenre, IKeyValuePair, IMediaDetailBase, IMediaSearchResult, IMovieDetail, IProductionCompany, ISeason, ITVDetail, MediaType, MovieManagerSettings } from "interfaces"
-import { Notice } from "obsidian"
+import { Notice, TFile } from "obsidian"
+import * as path from "path"
 import { DEFAULT_SETTINGS } from "settings"
 import { GetMovieDetails, GetTVDetails } from "tmdb"
 
 let adapter = app.vault.adapter
-let _settings = DEFAULT_SETTINGS
 let _fileName = ""
 let _mediaDetailBase : IMediaDetailBase
-let initSettings = (x: MovieManagerSettings) => {
-	_settings = x
-}
+let _settings : MovieManagerSettings
 
-let makeFileNameValid = async (fname: string, year: string) => {
-	let xname = fname.replace(/[/\\?%*:|"<>]/g, "")
-	if (await adapter.exists(xname + ".md")) {
-		let yr = year.substring(0, 4)
-		xname = `${xname} (${yr})`
+export function getFrontmatter (filePath: string) {
+	let metadata = app.metadataCache.getCache(filePath)
+		let fm = metadata?.frontmatter
+		if (fm) {
+			return metadata!.frontmatter!
+		}
+		return null
+}
+function getMediaFileCount(mediaType: MediaType) {
+	let files = app.vault.getMarkdownFiles()
+	let mediaCount = 0;
+	files.forEach((f: TFile) => {
+		let meta = getFrontmatter(f.path)
+		if (meta && meta.media_type == mediaType) {
+			mediaCount++
+		}
+	})
+	return mediaCount
+}
+async function getMovieFileCount () {
+	return getMediaFileCount(MediaType.Movie)
+}
+async function getTVFileCount () {
+	return getMediaFileCount(MediaType.TV)
+}
+export async function getMovieStatusBarText () {
+	const mfc = await getMovieFileCount()
+	const msuffix = mfc == 1 ? "" : "s"
+	return `${mfc} movie${msuffix}`
+}
+export async function getTVStatusBarText () {
+	const tvfc = await getTVFileCount()
+	const tvsuffix = tvfc == 1 ? "" : "s"
+	return `${tvfc} show${tvsuffix}`
+}
+let removeInvalidChars = (fileNameWithoutExt: string) => {
+	return fileNameWithoutExt.replace(/[/\\?%*:|"<>]/g, "")
+}
+let handleDuplicateFiles = async (media: IMediaDetailBase) => {
+	let fileNameWithExt = removeInvalidChars(media.title) + ".md"
+	let fileNameWithoutExt = fileNameWithExt.substring(0, fileNameWithExt.length-3)
+	let outName = fileNameWithExt
+	if (await adapter.exists(fileNameWithExt)) {
+		let fm = getFrontmatter(fileNameWithExt)
+		if (fm && fm.id != media.id) {
+		 	outName = `${fileNameWithoutExt} (${media.releaseDate.substring(0, 4)}).md`
+		}
 	}
-	return xname + ".md"
+	return outName
 }
-
 function truncate (s: string, max: number) {
 	return s.substring(0, max)
 }
@@ -59,14 +98,14 @@ let addMeta = (mediaType: MediaType) => {
 		kvpairList.push({key: "id", value: _mediaDetailBase.id.toString()})
 		kvpairList.push({key: "year", value: _mediaDetailBase.releaseDate})
 		kvpairList.push({key: "media_type", value: mediaType})
+		kvpairList.push({key: "search_title", value: _mediaDetailBase.title})
 	}
 	if (_settings.addSortTitle) {
-		debugger
 		let sortTitle = _mediaDetailBase.title.toLowerCase()
 		if (_settings.ignoreThe) {
 			sortTitle = removeThe(sortTitle)
 		}
-		kvpairList.push({key: "sort-title", value: sortTitle})
+		kvpairList.push({key: "sort_title", value: sortTitle})
 	}
 	adapter.append(_fileName, xrn("---"))
 	kvpairList.forEach(kvp => {
@@ -123,15 +162,13 @@ let addFormats = () => {
 }
 
 export async function WriteMovieMediaToFile (media: IMediaSearchResult, settings: MovieManagerSettings) {
-	initSettings(settings)
+	_settings = settings
 	new Notice(`Selected ${media.title}`)
 	console.log('selected media id: ' + media.id)
 	let movieDetailFull = await GetMovieDetails(media.id, settings)
-	let movieDetail = movieDetailFull.mediaDetails
-	_mediaDetailBase = movieDetail
-	_fileName = await makeFileNameValid(media.title, movieDetail.releaseDate)
-
-	debugger
+	let mediaBase = movieDetailFull.mediaDetails
+	_mediaDetailBase = mediaBase
+	_fileName = await handleDuplicateFiles(mediaBase)
 
 	addMeta(MediaType.Movie)
 	addGenres()
@@ -144,13 +181,13 @@ export async function WriteMovieMediaToFile (media: IMediaSearchResult, settings
 }
 
 export async function WriteTVMediaToFile (media: IMediaSearchResult, settings: MovieManagerSettings) {
-	initSettings(settings)
+	_settings = settings
 	new Notice(`Selected ${media.title}`)
 	console.log('selected media id: ' + media.id)
 	let tvDetailFull = await GetTVDetails(media.id, settings)
-	let tvDetail = tvDetailFull.mediaDetails
-	_mediaDetailBase = tvDetail
-	_fileName = await makeFileNameValid(media.title, tvDetail.releaseDate)
+	let mediaBase = tvDetailFull.mediaDetails
+	_mediaDetailBase = mediaBase
+	_fileName = await handleDuplicateFiles(mediaBase)
 
 	addMeta(MediaType.TV)
 	addGenres()
@@ -161,3 +198,4 @@ export async function WriteTVMediaToFile (media: IMediaSearchResult, settings: M
   addProductionCompanies()
   addFormats()
 }
+

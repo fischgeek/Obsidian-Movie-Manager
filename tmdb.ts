@@ -81,7 +81,6 @@ function createTVDetails (tv: any, settings: MovieManagerSettings) {
 			season: x.season_number
 		})
 	})
-	debugger
 	let tvd : ITVDetail = {
 		mediaDetails: createMediaDetailResult(tv, settings),
 		episodeCount: 0,

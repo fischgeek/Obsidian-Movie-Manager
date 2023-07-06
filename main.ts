@@ -1,13 +1,13 @@
-import { Notice, Plugin } from 'obsidian'
+import { Notice, Plugin, TFile } from 'obsidian'
 import { SearchMovie, SearchTV } from 'tmdb'
 import { MediaType, MovieManagerSettings } from 'interfaces'
 import { DEFAULT_SETTINGS, SettingsTab } from 'settings'
 import { SearchModal } from 'modal-search'
 import { SearchResultModal } from 'modal-search-results'
+import * as fun from 'fun'
 
 /*
 SUBMISSION READY
-[/] handle movies with same names // need better logic to compare id's and only do if different
 [ ] genres as tags option
 [ ] cast as links option
 [ ] seasons as links option
@@ -16,12 +16,13 @@ SUBMISSION READY
 [ ] production company delimiter / display option [flat,bullet]
 [ ] seasons delimiter / display option [flat,bullet]
 WOULD LIKE TO
-[ ] show movie count in status bar
 [/] defaults for formats // half done. would like to do this per format (dynamically)
 DONE
 [x] refresh the focused movie (tab)
 [x] handle collections
 [x] handle tv series
+[x] handle movies with same names // need better logic to compare id's and only do if different
+[x] show movie count in status bar
 */
 
 export default class MovieManager extends Plugin {
@@ -38,9 +39,11 @@ export default class MovieManager extends Plugin {
 		// Perform additional things with the ribbon
 		// ribbonIconEl.addClass('my-plugin-ribbon-class')
 
-		// // This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		// const statusBarItemEl = this.addStatusBarItem()
-		// statusBarItemEl.setText('Status Bar Text')
+		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
+		const statusBarItemEl = this.addStatusBarItem()
+		const statusBarItem2El = this.addStatusBarItem()
+		statusBarItemEl.setText(await fun.getMovieStatusBarText())
+		statusBarItem2El.setText(await fun.getTVStatusBarText())
 
 		this.addCommand({
 			id: 'add-movie',
@@ -81,16 +84,20 @@ export default class MovieManager extends Plugin {
 			callback: async () => {
 				let activeTitle = this.app.workspace.getActiveFile()
 				if (activeTitle) {
-					let metadata = this.app.metadataCache.getFileCache(activeTitle)?.frontmatter
+					let metadata = fun.getFrontmatter(activeTitle.path)
 					let mediaType = MediaType.Movie
-					if (metadata?.media_type) {
+					let title = activeTitle.basename
+					if (metadata && metadata.media_type) {
 						mediaType = metadata?.media_type
 					}
+					if (metadata && metadata.search_title) {
+						title = metadata.search_title
+					}
 					if (mediaType == MediaType.Movie) {
-						let movieSearchResults = await SearchMovie(activeTitle.basename, this.settings)
+						let movieSearchResults = await SearchMovie(title, this.settings)
 						new SearchResultModal(this.app, movieSearchResults, this.settings, MediaType.Movie).open()
 					} else {
-						let tvSearchResults = await SearchTV(activeTitle.basename, this.settings)
+						let tvSearchResults = await SearchTV(title, this.settings)
 						new SearchResultModal(this.app, tvSearchResults, this.settings, MediaType.TV).open()
 					}
 				}

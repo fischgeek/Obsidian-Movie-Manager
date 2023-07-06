@@ -53,7 +53,7 @@ export class SettingsTab extends PluginSettingTab {
 		containerEl.createEl('h2', {text: 'Front matter'})
 
 		const bannersDesc: DocumentFragment = sanitizeHTMLToDom(
-			'Adds the banner front matter to be used with the Banners plugin. '
+			'Adds the backdrop url to the front matter to be used with the Banners plugin. '
 			+ '<p>Currently disabled due to <a href="https://github.com/noatpad/obsidian-banners/issues/105">a bug with the Banners plugin.</a>'
 		)
 
@@ -219,6 +219,14 @@ export class SettingsTab extends PluginSettingTab {
 			containerEl.createEl('h2', {text: 'Coming Soon!'})
 
 			new Setting(containerEl)
+				.setName("Enumerate Cast")
+				.setDesc("Creates a new file for each actor with all the details.")
+				.addToggle(tgl => {
+					tgl.setValue(false)
+					tgl.setDisabled(true)
+				})
+
+			new Setting(containerEl)
 				.setName("Create Collection File")
 				.setDesc("Fetch Collection information and create the file when detected in a movie that belongs to a collection.")
 				.addToggle(tgl => {
@@ -245,6 +253,14 @@ export class SettingsTab extends PluginSettingTab {
 			new Setting(containerEl)
 				.setName("Enumerate Seasons")
 				.setDesc("Creates a new file for each season with all the details.")
+				.addToggle(tgl => {
+					tgl.setValue(false)
+					tgl.setDisabled(true)
+				})
+
+			new Setting(containerEl)
+				.setName("Keywords")
+				.setDesc("Creates a section of tags of keywords found for each title.")
 				.addToggle(tgl => {
 					tgl.setValue(false)
 					tgl.setDisabled(true)
