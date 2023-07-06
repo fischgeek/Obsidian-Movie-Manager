@@ -12,11 +12,13 @@ export const DEFAULT_SETTINGS: MovieManagerSettings = {
 	showCollections: true,
 	createCollectionFile: false,
 	showCast: true,
+	showSeasons: false,
 	castCount: 5,
 	showProductionCompanies: true,
 	showOwnedFormats: true,
 	formats: ["DVD", "Blu-ray", "Plex"],
-	defaultFormatsToTrue: true
+	defaultFormatsToTrue: true,
+	formatList: [""]
 }
 
 export class SettingsTab extends PluginSettingTab {
@@ -158,7 +160,6 @@ export class SettingsTab extends PluginSettingTab {
 						await this.plugin.saveSettings()					
 					})
 				})
-
 		}
 
 		containerEl.createEl('h2', {text: 'Production Companies'})
@@ -215,11 +216,35 @@ export class SettingsTab extends PluginSettingTab {
 					})
 				})
 
-			containerEl.createEl('h2', {text: 'Coming soon!'})
+			containerEl.createEl('h2', {text: 'Coming Soon!'})
 
 			new Setting(containerEl)
 				.setName("Create Collection File")
 				.setDesc("Fetch Collection information and create the file when detected in a movie that belongs to a collection.")
+				.addToggle(tgl => {
+					tgl.setValue(false)
+					tgl.setDisabled(true)
+				})
+
+			new Setting(containerEl)
+				.setName("Enumerate Collections")
+				.setDesc("Creates a new file for each collection with all the details.")
+				.addToggle(tgl => {
+					tgl.setValue(false)
+					tgl.setDisabled(true)
+				})
+
+			new Setting(containerEl)
+				.setName("Show Seasons")
+				.setDesc("Adds the Seasons section to TV shows.")
+				.addToggle(tgl => {
+					tgl.setValue(false)
+					tgl.setDisabled(true)
+				})
+
+			new Setting(containerEl)
+				.setName("Enumerate Seasons")
+				.setDesc("Creates a new file for each season with all the details.")
 				.addToggle(tgl => {
 					tgl.setValue(false)
 					tgl.setDisabled(true)

@@ -88,7 +88,6 @@ export default class MovieManager extends Plugin {
 						let tvSearchResults = await SearchTV(activeTitle.basename, this.settings)
 						new SearchResultModal(this.app, tvSearchResults, this.settings, MediaType.TV).open()
 					}
-					
 				}
 			}
 		})

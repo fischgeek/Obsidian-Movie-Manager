@@ -8,6 +8,7 @@ export interface MovieManagerSettings {
 	showCollections: boolean
 	createCollectionFile: boolean
 	showCast: boolean
+	showSeasons: boolean
 	castCount: number
 	showProductionCompanies: boolean
 	formats: string[]
