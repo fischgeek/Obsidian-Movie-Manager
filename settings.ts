@@ -62,7 +62,7 @@ export class SettingsTab extends PluginSettingTab {
 		)
 
 		new Setting(containerEl)
-			.setName("User Banner")
+			.setName("Use Banner")
 			.setDesc(bannersDesc)
 			.addToggle(tgl => {
 				tgl.setDisabled(true)
@@ -225,14 +225,6 @@ export class SettingsTab extends PluginSettingTab {
 			new Setting(containerEl)
 				.setName("Enumerate Cast")
 				.setDesc("Creates a new file for each actor with all the details.")
-				.addToggle(tgl => {
-					tgl.setValue(false)
-					tgl.setDisabled(true)
-				})
-
-			new Setting(containerEl)
-				.setName("Create Collection File")
-				.setDesc("Fetch Collection information and create the file when detected in a movie that belongs to a collection.")
 				.addToggle(tgl => {
 					tgl.setValue(false)
 					tgl.setDisabled(true)

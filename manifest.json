@@ -2,10 +2,10 @@
   "id": "movie-manager",
   "name": "Movie Manager",
   "version": "1.0.0",
-  "minAppVersion": "0.15.0",
-  "description": "Movie manager driven by TMDB (https://tmdb.org).",
+  "minAppVersion": "0.0.1",
+  "description": "A Movie manager plugin driven by TMDB (https://tmdb.org) and heavily inspired by the Media DB plugin",
   "author": "fischgeek",
-  "authorUrl": "https://github.com/fischgeek",
+  "authorUrl": "https://github.com/fischgeek/obsidian-movie-manager",
   "fundingUrl": "",
   "isDesktopOnly": false
 }
