@@ -7,7 +7,7 @@ import { SearchResultModal } from 'modal-search-results'
 import * as fun from 'fun'
 
 /*
-SUBMISSION READY
+WOULD LIKE TO
 [ ] genres as tags option
 [ ] cast as links option
 [ ] seasons as links option
@@ -15,8 +15,7 @@ SUBMISSION READY
 [ ] formats as tags option
 [ ] production company delimiter / display option [flat,bullet]
 [ ] seasons delimiter / display option [flat,bullet]
-[ ] clickable link to themoviedb.org in settings
-WOULD LIKE TO
+[ ] custom formats similar to media db plugin
 [/] defaults for formats // half done. would like to do this per format (dynamically)
 DONE
 [x] refresh the focused movie (tab)
@@ -24,6 +23,7 @@ DONE
 [x] handle tv series
 [x] handle movies with same names // need better logic to compare id's and only do if different
 [x] show movie count in status bar
+[x] clickable link to themoviedb.org in settings
 */
 
 export default class MovieManager extends Plugin {

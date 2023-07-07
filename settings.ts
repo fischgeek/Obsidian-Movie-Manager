@@ -36,9 +36,13 @@ export class SettingsTab extends PluginSettingTab {
 		containerEl.empty()
 		// containerEl.createEl('h1', {text: 'Movie Manager'})
 
+		const apiDesc: DocumentFragment = sanitizeHTMLToDom(
+			'Your API key. Get one free at <a hreg="https://developer.themoviedb.org">https://developer.themoviedb.org</a>!'
+		)
+
 		new Setting(containerEl)
 			.setName('API Key')
-			.setDesc('Your API key. Get one free at https://developer.themoviedb.org!')
+			.setDesc(apiDesc)
 			.addText(text => text
 				.setPlaceholder('api key')
 				.setValue(this.plugin.settings.apikey)
