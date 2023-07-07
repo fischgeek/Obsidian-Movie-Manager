@@ -1,16 +1,30 @@
 import { IActor, IGenre, IKeyValuePair, IMediaDetailBase, IMediaSearchResult, IMovieDetail, IProductionCompany, ISeason, ITVDetail, MediaType, MovieManagerSettings } from "interfaces"
 import { Notice, TFile } from "obsidian"
-import * as path from "path"
 import { DEFAULT_SETTINGS } from "settings"
+import * as path from "path"
 import { GetMovieDetails, GetTVDetails } from "tmdb"
 
 let adapter = app.vault.adapter
 let _fileName = ""
 let _mediaDetailBase : IMediaDetailBase
-let _settings : MovieManagerSettings
+let _movieDetailFull : IMovieDetail
+let _tvDetailFull : ITVDetail
+let _settings = DEFAULT_SETTINGS
 
+export function getPath (filePath: string) {
+	let x = `${_settings.rootDir}/${filePath}`
+	console.log('joined path restult: ' + x)
+	return x
+}
+async function ensureRoot () {
+	const rd = _settings.rootDir ?? this.app.vault.getAbstractFileByPath('/');
+	console.log('rood dir: ' + rd)
+	if (await this.app.vault.adapter.exists(rd) == false) {
+		await this.app.vault.createFolder(rd)
+	}
+}
 export function getFrontmatter (filePath: string) {
-	let metadata = app.metadataCache.getCache(filePath)
+	let metadata = app.metadataCache.getCache(getPath(filePath))
 		let fm = metadata?.frontmatter
 		if (fm) {
 			return metadata!.frontmatter!
@@ -51,13 +65,13 @@ let handleDuplicateFiles = async (media: IMediaDetailBase) => {
 	let fileNameWithExt = removeInvalidChars(media.title) + ".md"
 	let fileNameWithoutExt = fileNameWithExt.substring(0, fileNameWithExt.length-3)
 	let outName = fileNameWithExt
-	if (await adapter.exists(fileNameWithExt)) {
-		let fm = getFrontmatter(fileNameWithExt)
+	if (await adapter.exists(getPath(fileNameWithExt))) {
+		let fm = getFrontmatter(getPath(fileNameWithExt))
 		if (fm && fm.id != media.id) {
 		 	outName = `${fileNameWithoutExt} (${media.releaseDate.substring(0, 4)}).md`
 		}
 	}
-	return outName
+	return getPath(outName)
 }
 function truncate (s: string, max: number) {
 	return s.substring(0, max)
@@ -90,16 +104,13 @@ let rnrnx = (str:string) => { return `\r\n\r\n${str}` }
 
 let addMeta = (mediaType: MediaType) => {
 	let kvpairList = [] as IKeyValuePair[]
-	app.vault.adapter.write(_fileName, "")
 	if (_settings.useBanner) {
 		kvpairList.push({key: "banner", value: _mediaDetailBase.backdropUrl})
 	}
-	if (_settings.addMeta) {
-		kvpairList.push({key: "id", value: _mediaDetailBase.id.toString()})
-		kvpairList.push({key: "year", value: _mediaDetailBase.releaseDate})
-		kvpairList.push({key: "media_type", value: mediaType})
-		kvpairList.push({key: "search_title", value: _mediaDetailBase.title})
-	}
+	kvpairList.push({key: "id", value: _mediaDetailBase.id.toString()})
+	kvpairList.push({key: "year", value: _mediaDetailBase.releaseDate})
+	kvpairList.push({key: "media_type", value: mediaType})
+	kvpairList.push({key: "search_title", value: _mediaDetailBase.title})
 	if (_settings.addSortTitle) {
 		let sortTitle = _mediaDetailBase.title.toLowerCase()
 		if (_settings.ignoreThe) {
@@ -122,10 +133,10 @@ let addPoster = () => {
 let addOverview = () => {
 	adapter.append(_fileName, xrn(`${_mediaDetailBase.overview}`))
 }
-let addCollection = (collection: string) => {
-	if (_settings.showCollections && collection != "") {
+let addCollection = () => {
+	if (_settings.showCollections && _movieDetailFull.collection != "") {
 		adapter.append(_fileName, xrn("## Collection"))
-		adapter.append(_fileName, xrn(`[[${collection}]]`))
+		adapter.append(_fileName, xrn(`[[${_movieDetailFull.collection}]]`))
 	}
 }
 let addCast = () => {
@@ -136,10 +147,10 @@ let addCast = () => {
 		})
 	}
 }
-let addSeasons = (seasons: ISeason[]) => {
+let addSeasons = () => {
 	if (_settings.showProductionCompanies) {
 		adapter.append(_fileName, xrn("## Seasons"))
-		seasons.forEach( (season: ISeason) => {
+		_tvDetailFull.seasons.forEach( (season: ISeason) => {
 			adapter.append(_fileName, `[[${season.title}]] | `)
 		})
 		adapter.append(_fileName, xrn(""))
@@ -161,39 +172,46 @@ let addFormats = () => {
 	}
 }
 
-export async function WriteMovieMediaToFile (media: IMediaSearchResult, settings: MovieManagerSettings) {
+async function init (settings: MovieManagerSettings, media: IMediaSearchResult, mediaType: MediaType) {
 	_settings = settings
+	await ensureRoot()
 	new Notice(`Selected ${media.title}`)
 	console.log('selected media id: ' + media.id)
-	let movieDetailFull = await GetMovieDetails(media.id, settings)
-	let mediaBase = movieDetailFull.mediaDetails
+	let details
+	if (mediaType == MediaType.Movie) {
+		details = await GetMovieDetails(media.id, settings)
+		_movieDetailFull = details
+	} else {
+		details = await GetTVDetails(media.id, settings)
+		_tvDetailFull = details
+	}
+	let mediaBase = details.mediaDetails
 	_mediaDetailBase = mediaBase
 	_fileName = await handleDuplicateFiles(mediaBase)
+	await app.vault.adapter.write(_fileName, "")
+}
+
+export async function WriteMovieMediaToFile (media: IMediaSearchResult, settings: MovieManagerSettings) {
+	await init(settings, media, MediaType.Movie)
 
 	addMeta(MediaType.Movie)
 	addGenres()
 	addPoster()
 	addOverview()
-	addCollection(movieDetailFull.collection)
+	addCollection()
   addCast()
   addProductionCompanies()
   addFormats()
 }
 
 export async function WriteTVMediaToFile (media: IMediaSearchResult, settings: MovieManagerSettings) {
-	_settings = settings
-	new Notice(`Selected ${media.title}`)
-	console.log('selected media id: ' + media.id)
-	let tvDetailFull = await GetTVDetails(media.id, settings)
-	let mediaBase = tvDetailFull.mediaDetails
-	_mediaDetailBase = mediaBase
-	_fileName = await handleDuplicateFiles(mediaBase)
+	await init(settings, media, MediaType.TV)
 
 	addMeta(MediaType.TV)
 	addGenres()
 	addPoster()
 	addOverview()
-	addSeasons(tvDetailFull.seasons)
+	addSeasons()
   addCast()
   addProductionCompanies()
   addFormats()

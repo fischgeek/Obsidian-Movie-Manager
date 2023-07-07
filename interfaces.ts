@@ -1,6 +1,6 @@
 export interface MovieManagerSettings {
 	apikey: string
-	maxResults: number
+	rootDir: string
 	useBanner: boolean
 	addMeta: boolean
 	addSortTitle: boolean

@@ -4,7 +4,7 @@ import { App, PluginSettingTab, sanitizeHTMLToDom, Setting } from "obsidian"
 
 export const DEFAULT_SETTINGS: MovieManagerSettings = {
 	apikey: '',
-	maxResults: 5,
+	rootDir: '/',
 	useBanner: false,
 	addMeta: true,
 	addSortTitle: true,
@@ -54,6 +54,22 @@ export class SettingsTab extends PluginSettingTab {
 				})
 			)
 
+		new Setting(containerEl)
+			.setName('Root Directory')
+			.setDesc('The directory you want all titles to be added in.')
+			.addText(text => text
+				.setPlaceholder('/')
+				.setValue(this.plugin.settings.rootDir)
+					.onChange(async (value) => {
+						this.plugin.settings.rootDir = value
+						await this.plugin.saveSettings()
+						// if (await this.app.vault.adapter.exists(this.plugin.settings.rootDir) == false) {
+						// 	this.app.vault.adapter.mkdir(this.plugin.settings.rootDir)
+						// }
+						this.plugin.registerView
+				})
+			)
+
 		containerEl.createEl('h2', {text: 'Front matter'})
 
 		const bannersDesc: DocumentFragment = sanitizeHTMLToDom(
@@ -65,21 +81,10 @@ export class SettingsTab extends PluginSettingTab {
 			.setName("Use Banner")
 			.setDesc(bannersDesc)
 			.addToggle(tgl => {
-				tgl.setDisabled(true)
+				// tgl.setDisabled(true)
 				tgl.setValue(this.settings.useBanner)
 				tgl.onChange(async (val) => {
 					this.settings.useBanner = val
-					await this.plugin.saveSettings()
-				})
-			})
-
-		new Setting(containerEl)
-			.setName("Add Meta")
-			.setDesc("Adds the id and name to the front matter.")
-			.addToggle(tgl => {
-				tgl.setValue(this.settings.addMeta)
-				tgl.onChange(async (val) => {
-					this.settings.addMeta = val
 					await this.plugin.saveSettings()
 				})
 			})

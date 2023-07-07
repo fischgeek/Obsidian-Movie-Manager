@@ -33,20 +33,20 @@ export class SearchResultModal extends SuggestModal<IMediaSearchResult> {
 	async onChooseSuggestion(media: IMediaSearchResult, evt: MouseEvent | KeyboardEvent) {
 		this.settings.formatList = [""]
 		if (this.settings.showOwnedFormats) {
-			new ConfirmModal(this.app, this.settings, (fmtList) => {
+			new ConfirmModal(this.app, this.settings, async (fmtList) => {
 				let formatList = fmtList.split(",")
 				this.settings.formatList = formatList
 				if (this.mediaType == MediaType.Movie) {
-					WriteMovieMediaToFile(media, this.settings)
+					await WriteMovieMediaToFile(media, this.settings)
 				} else if (this.mediaType == MediaType.TV) {
-					WriteTVMediaToFile(media, this.settings)
+					await WriteTVMediaToFile(media, this.settings)
 				}
 			}).open()
 		} else {
 			if (this.mediaType == MediaType.Movie) {
-				WriteMovieMediaToFile(media, this.settings)
+				await WriteMovieMediaToFile(media, this.settings)
 			} else if (this.mediaType == MediaType.TV) {
-				WriteTVMediaToFile(media, this.settings)
+				await WriteTVMediaToFile(media, this.settings)
 			}
 		}
 	}
