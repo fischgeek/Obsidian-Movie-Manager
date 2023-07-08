@@ -120,7 +120,7 @@ let addMeta = (mediaType: MediaType) => {
 	}
 	adapter.append(_fileName, xrn("---"))
 	kvpairList.forEach(kvp => {
-		adapter.append(_fileName, xrn(`${kvp.key}: '${kvp.value}'`))
+		adapter.append(_fileName, xrn(`${kvp.key}: "${kvp.value}"`))
 	})
 	adapter.append(_fileName, xrn("---"))
 }
