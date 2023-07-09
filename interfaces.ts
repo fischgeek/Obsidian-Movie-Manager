@@ -2,6 +2,7 @@ export interface MovieManagerSettings {
 	apikey: string
 	rootDir: string
 	useBanner: boolean
+	userPosterAsBanner: boolean
 	addMeta: boolean
 	addSortTitle: boolean
 	ignoreThe: boolean

@@ -1,4 +1,4 @@
-import { truncate250, WriteMovieMediaToFile, WriteTVMediaToFile } from "fun"
+import { truncate250, WriteMediaToFile } from "fun"
 import { IMediaSearchResult, MediaType, MovieManagerSettings } from "interfaces"
 import { ConfirmModal } from "modal-confirm"
 import { SuggestModal, App } from "obsidian"
@@ -12,6 +12,7 @@ export class SearchResultModal extends SuggestModal<IMediaSearchResult> {
 		this.mediaResults = mediaResults
 		this.settings = settings
 		this.mediaType = mediaType
+		this.inputEl.focus()
 		}
 
 	getSuggestions(query: string): IMediaSearchResult[] {
@@ -36,18 +37,10 @@ export class SearchResultModal extends SuggestModal<IMediaSearchResult> {
 			new ConfirmModal(this.app, this.settings, async (fmtList) => {
 				let formatList = fmtList.split(",")
 				this.settings.formatList = formatList
-				if (this.mediaType == MediaType.Movie) {
-					await WriteMovieMediaToFile(media, this.settings)
-				} else if (this.mediaType == MediaType.TV) {
-					await WriteTVMediaToFile(media, this.settings)
-				}
+				await WriteMediaToFile(media, this.mediaType, this.settings)
 			}).open()
 		} else {
-			if (this.mediaType == MediaType.Movie) {
-				await WriteMovieMediaToFile(media, this.settings)
-			} else if (this.mediaType == MediaType.TV) {
-				await WriteTVMediaToFile(media, this.settings)
-			}
+			await WriteMediaToFile(media, this.mediaType, this.settings)
 		}
 	}
 }

@@ -19,6 +19,7 @@ There are a couple movie/media plugins out there for Obsidian. I wanted somethin
 ## Required Settings
 
 - **API Key** Required for obvious reasons. You can get one for free at [https://themoviedb.org](https://themoviedb.org)!
+- **Root Directory** Where you want your movies/series to be added.
 
 ## Optional Settings
 
@@ -47,6 +48,8 @@ There are a couple movie/media plugins out there for Obsidian. I wanted somethin
 - **Enumerate Seasons** Have the plugin enumerate the seasons of a series and automatically create a file for each with all the details.
 
 - **Keywords** Show a tag list of keywords for a particular title.
+
+- **Template** Design your own template file and tweak each movie/series to look exactly how you want it. Inspired by the Media DB plugin.
 
 ## Examples
 

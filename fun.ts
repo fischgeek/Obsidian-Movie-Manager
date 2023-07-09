@@ -105,7 +105,11 @@ let rnrnx = (str:string) => { return `\r\n\r\n${str}` }
 let addMeta = (mediaType: MediaType) => {
 	let kvpairList = [] as IKeyValuePair[]
 	if (_settings.useBanner) {
-		kvpairList.push({key: "banner", value: _mediaDetailBase.backdropUrl})
+		if (_settings.userPosterAsBanner) {
+			kvpairList.push({key: "banner", value: _mediaDetailBase.posterUrl})	
+		} else {
+			kvpairList.push({key: "banner", value: _mediaDetailBase.backdropUrl})
+		}
 	}
 	kvpairList.push({key: "id", value: _mediaDetailBase.id.toString()})
 	kvpairList.push({key: "year", value: _mediaDetailBase.releaseDate})
@@ -191,29 +195,18 @@ async function init (settings: MovieManagerSettings, media: IMediaSearchResult, 
 	await app.vault.adapter.write(_fileName, "")
 }
 
-export async function WriteMovieMediaToFile (media: IMediaSearchResult, settings: MovieManagerSettings) {
-	await init(settings, media, MediaType.Movie)
-
-	addMeta(MediaType.Movie)
+export async function WriteMediaToFile (media: IMediaSearchResult, mediaType: MediaType, settings: MovieManagerSettings) {
+	await init(settings, media, mediaType)
+	addMeta(mediaType)
 	addGenres()
 	addPoster()
 	addOverview()
-	addCollection()
-  addCast()
+	if (mediaType == MediaType.Movie) {
+		addCollection()
+	} else if (mediaType == MediaType.TV) {
+		addSeasons()
+	}
+	addCast()
   addProductionCompanies()
   addFormats()
 }
-
-export async function WriteTVMediaToFile (media: IMediaSearchResult, settings: MovieManagerSettings) {
-	await init(settings, media, MediaType.TV)
-
-	addMeta(MediaType.TV)
-	addGenres()
-	addPoster()
-	addOverview()
-	addSeasons()
-  addCast()
-  addProductionCompanies()
-  addFormats()
-}
-

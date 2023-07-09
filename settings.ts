@@ -6,6 +6,7 @@ export const DEFAULT_SETTINGS: MovieManagerSettings = {
 	apikey: '',
 	rootDir: '/',
 	useBanner: false,
+	userPosterAsBanner: false,
 	addMeta: true,
 	addSortTitle: true,
 	ignoreThe: true,
@@ -88,6 +89,18 @@ export class SettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings()
 				})
 			})
+
+			new Setting(containerEl)
+				.setName("Use Poster as Banner")
+				.setDesc("Use the movie/series poster instead of the backdrop (default).")
+				.addToggle(tgl => {
+					// tgl.setDisabled(true)
+					tgl.setValue(this.settings.userPosterAsBanner)
+					tgl.onChange(async (val) => {
+						this.settings.userPosterAsBanner = val
+						await this.plugin.saveSettings()
+					})
+				})
 
 		new Setting(containerEl)
 			.setName("Add Sort Title")
@@ -262,6 +275,14 @@ export class SettingsTab extends PluginSettingTab {
 			new Setting(containerEl)
 				.setName("Keywords")
 				.setDesc("Creates a section of tags of keywords found for each title.")
+				.addToggle(tgl => {
+					tgl.setValue(false)
+					tgl.setDisabled(true)
+				})
+
+			new Setting(containerEl)
+				.setName("Templates")
+				.setDesc("Design your own template file and tweak each movie/series to look exactly how you want it. Inspired by the Media DB plugin.")
 				.addToggle(tgl => {
 					tgl.setValue(false)
 					tgl.setDisabled(true)
